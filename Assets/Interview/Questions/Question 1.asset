@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
+  m_Name: Question 1
+  m_EditorClassIdentifier: 
+  Question: "\xBFQu\xE9 sab\xE9s acerca de Smart Technology?"
+  PossibleAnswers:
+  - AnswerText: "S\xE9 que Smart Technology es una empresa l\xEDder en soluciones
+      tecnol\xF3gicas innovadoras, enfocada en integrar la inteligencia artificial
+      y el dise\xF1o interactivo en productos que mejoran la experiencia de los usuarios.
+      Me gusta que su misi\xF3n sea transformar la forma en que las personas interact\xFAan
+      con la tecnolog\xEDa, haci\xE9ndola m\xE1s accesible y eficiente."
+    AnswerType: 0
+  - AnswerText: "He le\xEDdo un poco sobre la empresa, pero no estoy muy familiarizada
+      con todos sus proyectos"
+    AnswerType: 1
+  - AnswerText: "No investigu\xE9 mucho sobre la empresa. Solo vi que ten\xEDan una
+      vacante."
+    AnswerType: 2
+  Responses:
+  - ResponseType: 0
+    ResponseText: "\xA1Claramente investigaste bastante sobre nosotros! Me alegra
+      escuchar eso. En fin, siguiente pregunta."
+  - ResponseType: 1
+    ResponseText: "Ah, ya veo. \xA1Un poco es mejor que nada!. Siguiente pregunta."
+  - ResponseType: 2
+    ResponseText: Ehm... Oook... Mejor pasemos a la siguiente pregunta...
+  - ResponseType: 3
+    ResponseText: "\xBFHoola? \xBFEst\xE1s bien? \xBFNecesit\xE1s un vaso de agua?
+      Mejor pasemos a la siguiente pregunta..."
