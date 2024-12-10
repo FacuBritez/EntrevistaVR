@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
+  m_Name: Question 6
+  m_EditorClassIdentifier: 
+  Question: Contame de un proyecto en el que hayas trabajado y que te haya llenado
+    de orgullo.
+  PossibleAnswers:
+  - AnswerText: "Dise\xF1\xE9 una interfaz interactiva que mejor\xF3 la experiencia
+      de usuario en un sitio web. Fue genial ver c\xF3mo el feedback positivo de
+      los usuarios impact\xF3 en el crecimiento de la empresa."
+    AnswerType: 0
+  - AnswerText: "No tengo ning\xFAn proyecto en particular de l que me sienta orgullosa.
+      La mayor\xEDa de las veces solo hago lo que se me pide."
+    AnswerType: 2
+  - AnswerText: "He trabajado en varios proyectos, pero ninguno ha sido tan significativo
+      como me hubiera gustado. Conf\xEDo en que pronto llegar\xE1 un proyecto que
+      realmente me guste."
+    AnswerType: 1
+  Responses:
+  - ResponseType: 0
+    ResponseText: "\xA1Excelente! Sigamos..."
+  - ResponseType: 1
+    ResponseText: Bien, continuemos.
+  - ResponseType: 2
+    ResponseText: Mejor vamos a otra pregunta...
+  - ResponseType: 3
+    ResponseText: "Perd\xF3n, tenemos que seguir..."

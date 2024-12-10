@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
+  m_Name: Question 7
+  m_EditorClassIdentifier: 
+  Question: "\xBFQue sab\xE9s acerca de Smart Technology?"
+  PossibleAnswers:
+  - AnswerText: "Es una empresa enfocada en integrar la inteligencia artificial y
+      el dise\xF1o interactivo en productos que mejoran la experiencia de los usuarios."
+    AnswerType: 0
+  - AnswerText: "No investigu\xE9 mucho sobre la empresa. Solo vi que ten\xEDan una
+      vacante y me postul\xE9."
+    AnswerType: 2
+  - AnswerText: "Si he le\xEDdo sobre la empresa, pero no estoy muy familiarizada
+      con todos sus proyectos."
+    AnswerType: 1
+  Responses:
+  - ResponseType: 0
+    ResponseText: "\xA1Excelente! Sigamos..."
+  - ResponseType: 1
+    ResponseText: Bien, continuemos.
+  - ResponseType: 2
+    ResponseText: Mejor vamos a otra pregunta...
+  - ResponseType: 3
+    ResponseText: "Perd\xF3n, tenemos que seguir..."

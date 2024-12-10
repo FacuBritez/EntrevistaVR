@@ -12,31 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
   m_Name: Question 2
   m_EditorClassIdentifier: 
-  Question: "\xBFPor qu\xE9 te interesa este puesto?"
+  Question: "\xBFCu\xE1l es tu mayor punto a mejorar?"
   PossibleAnswers:
-  - AnswerText: "Este puesto me permitir\xEDa combinar mis habilidades t\xE9cnicas
-      y creativas. Me encantan los proyectos en los que trabaja la empresa y c\xF3mo
-      valoran a sus equipos"
+  - AnswerText: A veces me puedo centrar demasiado en los detalles, pero he estado
+      trabajando en mejorar mi capacidad para ver el panorama general.
     AnswerType: 0
-  - AnswerText: "Creo que encajo en lo que buscan, pero tambi\xE9n estoy considerando
-      otras opciones laborales."
-    AnswerType: 1
-  - AnswerText: "La verdad es que solo necesito un trabajo, no importa mucho en qu\xE9
-      \xE1rea sea."
+  - AnswerText: "La organizaci\xF3n no es lo m\xEDo aunque lo intento, siempre llego
+      tarde a los plazos pero suelo entregar todo lo que se me pide."
     AnswerType: 2
+  - AnswerText: "Como todas las personas, tengo \xE1reas que puedo mejorar, pero
+      trato de aprender de cada experiencia y seguir creciendo."
+    AnswerType: 1
   Responses:
   - ResponseType: 0
-    ResponseText: "\xA1Oooh, me encantar\xEDa escuchar acerca de estas habilidades
-      t\xE9cnicas tuyas\xA1 Pero eso ser\xE1 mas adelante. Por ahora, siguiente pregunta."
+    ResponseText: "\xA1Excelente! Sigamos..."
   - ResponseType: 1
-    ResponseText: "\xBF\"Creo\"? Eso es un poco preocupante... \xA1Pero que tengas
-      varias oportunidades es bueno! Significa que en verdad tiene talento.. En fin,
-      siguiente pregunta."
+    ResponseText: Bien, continuemos.
   - ResponseType: 2
-    ResponseText: "\xA1Por favor muestre un poco m\xE1s de ganas! Si realmente no
-      le precupa el tipo de trabajo, puede encontrarlo en otro lugar...  Siguiente
-      pregunta."
+    ResponseText: Mejor vamos a otra pregunta...
   - ResponseType: 3
-    ResponseText: "Perdoname, tenemos un tiempo limitado ac\xE1 y no puedo seguir
-      esperando tu respuesta... \xBFY si pasamos a la siguiente pregunta? Si, hagamos
-      eso..."
+    ResponseText: "Perd\xF3n, tenemos que seguir..."

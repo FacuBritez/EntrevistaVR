@@ -60,5 +60,6 @@ Material:
     - _DecalMeshDepthBias: 0
     - _DecalMeshViewBias: 0
     - _DrawOrder: 0
+    - _NoiseScale: 10
     m_Colors: []
   m_BuildTextureStacks: []

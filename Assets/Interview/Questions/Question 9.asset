@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
+  m_Name: Question 9
+  m_EditorClassIdentifier: 
+  Question: "\xBFCu\xE1les son tus expectativas salariales?"
+  PossibleAnswers:
+  - AnswerText: Estuve investigando lo que gana un rol Jr en una empresa similar
+      y tengo una idea. Estoy dispuesta a charlar y negociar, me interesa la oportunidad.
+    AnswerType: 0
+  - AnswerText: "No s\xE9, lo que me paguen est\xE1 bien. No soy una persona ambiciosa,
+      solo quiero tener dinero para poder manejarme de forma independiente."
+    AnswerType: 2
+  - AnswerText: "He investigado, aunque no tengo una cifra. espero que la propuesta
+      econ\xF3mica est\xE9 alineada con el mercado y las exigencias del puesto."
+    AnswerType: 1
+  Responses:
+  - ResponseType: 0
+    ResponseText: "\xA1Excelente! Sigamos..."
+  - ResponseType: 1
+    ResponseText: Bien, continuemos.
+  - ResponseType: 2
+    ResponseText: Mejor vamos a otra pregunta...
+  - ResponseType: 3
+    ResponseText: "Perd\xF3n, tenemos que seguir..."

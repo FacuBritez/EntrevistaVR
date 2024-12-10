@@ -12,24 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
   m_Name: Question 3
   m_EditorClassIdentifier: 
-  Question: "\xBFQu\xE9 te motiva a querer trabajar con nosotros?"
+  Question: "\xBFC\xF3mo manej\xE1s los plazos ajustados en un proyecto?"
   PossibleAnswers:
-  - AnswerText: "\"Estoy muy emocionade por la oportunidad de ser parte de una empresa
-      que est\xE1 a la vanguardia en arte y tecnolog\xEDa. Me motiva la idea de trabajar
-      en proyectos innovadores y seguir aprendiendo\u201D."
+  - AnswerText: Me aseguro de planificar bien desde el inicio, divido las tareas
+      y mantengo informado al equipo para ajustarnos al cronograma o pedir ayuda
+      si fuera necesario.
     AnswerType: 0
-  - AnswerText: "\"No tengo una raz\xF3n espec\xEDfica, solo estoy buscando cualquier
-      trabajo que pueda conseguir.\""
-    AnswerType: 1
-  - AnswerText: "\"Me parece una empresa interesante y me gustar\xEDa ver si este
-      rol es una buena oportunidad para m\xED.\""
+  - AnswerText: "No me llevo bien con los plazos y me suele costar respetarlos. A
+      veces me retraso y necesito que me recuerden las fechas l\xEDmite."
     AnswerType: 2
+  - AnswerText: "Depende del proyecto, me interesa m\xE1s la calidad de lo que presento
+      que las fechas, me concentro mucho en los detalles y eso puede hacer que me
+      demore un poco m\xE1s de lo esperado."
+    AnswerType: 1
   Responses:
   - ResponseType: 0
     ResponseText: "\xA1Excelente! Sigamos..."
   - ResponseType: 1
     ResponseText: Bien, continuemos.
   - ResponseType: 2
-    ResponseText: "\xBFOookay? Mejor vamos a otra pregunta..."
+    ResponseText: Mejor vamos a otra pregunta...
   - ResponseType: 3
-    ResponseText: "Perd\xF3n, tardaste mucho, tenemos que seguir..."
+    ResponseText: "Perd\xF3n, tenemos que seguir..."

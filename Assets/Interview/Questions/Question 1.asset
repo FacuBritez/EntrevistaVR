@@ -12,28 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4c8c0e644e94974da535451ef37fc79, type: 3}
   m_Name: Question 1
   m_EditorClassIdentifier: 
-  Question: "\xBFQu\xE9 sab\xE9s acerca de Smart Technology?"
+  Question: "\xBFPor qu\xE9 te interesa este puesto?"
   PossibleAnswers:
-  - AnswerText: "S\xE9 que Smart Technology es una empresa l\xEDder en soluciones
-      tecnol\xF3gicas innovadoras, enfocada en integrar la inteligencia artificial
-      y el dise\xF1o interactivo en productos que mejoran la experiencia de los usuarios.
-      Me gusta que su misi\xF3n sea transformar la forma en que las personas interact\xFAan
-      con la tecnolog\xEDa, haci\xE9ndola m\xE1s accesible y eficiente."
+  - AnswerText: "Porque me permitir\xEDa combinar mis habilidades T\xE9cnicas y creativas.
+      Me encantan los proyectos en los que trabaja la empresa y c\xF3mo valoran sus
+      equipos."
     AnswerType: 0
-  - AnswerText: "He le\xEDdo un poco sobre la empresa, pero no estoy muy familiarizada
-      con todos sus proyectos"
-    AnswerType: 1
-  - AnswerText: "No investigu\xE9 mucho sobre la empresa. Solo vi que ten\xEDan una
-      vacante."
+  - AnswerText: "La verdad es que solo necesito un trabajo, no importa mucho en qu\xE9
+      \xE1rea sea. As\xED que, lo que me ofrezcan va a estar bien."
     AnswerType: 2
+  - AnswerText: "He le\xEDdo atentamente la b\xFAsqueda y creo que encajo en lo que
+      buscan, pero tambi\xE9n estoy considerando otras opciones laborales as\xED
+      que me gustar\xEDa escuchar cu\xE1l es la propuesta."
+    AnswerType: 1
   Responses:
   - ResponseType: 0
-    ResponseText: "\xA1Claramente investigaste bastante sobre nosotros! Me alegra
-      escuchar eso. En fin, siguiente pregunta."
+    ResponseText: "\xA1Excelente! Sigamos..."
   - ResponseType: 1
-    ResponseText: "Ah, ya veo. \xA1Un poco es mejor que nada!. Siguiente pregunta."
+    ResponseText: Bien, continuemos.
   - ResponseType: 2
-    ResponseText: Ehm... Oook... Mejor pasemos a la siguiente pregunta...
+    ResponseText: Mejor vamos a otra pregunta...
   - ResponseType: 3
-    ResponseText: "\xBFHoola? \xBFEst\xE1s bien? \xBFNecesit\xE1s un vaso de agua?
-      Mejor pasemos a la siguiente pregunta..."
+    ResponseText: "Perd\xF3n, tenemos que seguir..."
