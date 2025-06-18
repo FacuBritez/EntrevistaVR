@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Question: "\xBFPor qu\xE9 te interesa este puesto?"
   PossibleAnswers:
-  - AnswerText: "Porque me permitir\xEDa combinar mis habilidades T\xE9cnicas y creativas.
+  - AnswerText: "Porque me permitir\xEDa combinar mis habilidades t\xE9cnicas y creativas.
       Me encantan los proyectos en los que trabaja la empresa y c\xF3mo valoran sus
       equipos."
     AnswerType: 0

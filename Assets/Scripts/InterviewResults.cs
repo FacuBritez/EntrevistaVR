@@ -16,15 +16,20 @@ public class InterviewResults : MonoBehaviour
 
         int score = InterviewManager.Score;
 
+        Debug.Log(score);
+
         if(score < minNeutralEnding)
         {
-            image.sprite = badEnding;
+			Debug.Log("bad");
+			image.sprite = badEnding;
         } else if(score < minGoodEnding)
         {
-            image.sprite = neutralEnding;
+			Debug.Log("Mid");
+			image.sprite = neutralEnding;
         } else 
         {
-            image.sprite = goodEnding;
+			Debug.Log("good");
+			image.sprite = goodEnding;
         }
     }
 }

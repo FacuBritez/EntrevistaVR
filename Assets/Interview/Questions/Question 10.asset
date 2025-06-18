@@ -18,9 +18,9 @@ MonoBehaviour:
       me gustar\xEDa saber c\xF3mo contin\xFAa el proceso de selecci\xF3n."
     AnswerType: 0
   - AnswerText: "No gracias, \xBFya me puedo retirar? \xA1Es que tengo otra entrevista
-      laboral ac\xE1 cerca y si no me voy ahora no llego!"
+      laboral ac\xE1 cerca y si no me voy ahora, no llego!"
     AnswerType: 2
-  - AnswerText: "Cero que no, en este momento no tengo m\xE1s preguntas. Si surge
+  - AnswerText: "Creo que no, en este momento no tengo m\xE1s preguntas. Si surge
       algo despu\xE9s, lo consultar\xEDa m\xE1s adelante v\xEDa mail, gracias."
     AnswerType: 1
   Responses:

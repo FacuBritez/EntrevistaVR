@@ -15,13 +15,13 @@ public class ResetPlayerPosition : MonoBehaviour
     private void Awake() 
     {
         initialPosition = transform.position;
-
-        actions.FindActionMap("XRI LeftHand Interaction").FindAction("Reposition").performed += (x) => ResetPosition();
     }
 
     private void Start() 
     {
-        Invoke("ResetPosition", 0.5f);
+		actions.FindActionMap("XRI LeftHand Interaction").FindAction("Reposition").performed += (x) => ResetPosition();
+
+		Invoke("ResetPosition", 0.5f);
     }
 
     public void ResetPosition()

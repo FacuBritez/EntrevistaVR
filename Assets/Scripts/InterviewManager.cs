@@ -28,6 +28,8 @@ public class InterviewManager : MonoBehaviour
     private void Start() 
     {
         showText.Invoke(initialDialogue, true);
+
+        Score = 0;
     }
 
     public void AskNextQuestion()
@@ -62,6 +64,8 @@ public class InterviewManager : MonoBehaviour
         {
             Score--;
         }
+
+        Debug.Log(Score);
 
         string response = currentQuestion.Responses.Where(x => x.ResponseType == questionPicked)?.FirstOrDefault().ResponseText;
         showText.Invoke(response, true);

@@ -9,6 +9,8 @@ public class UITimer : MonoBehaviour
 
     private void Update() 
     {
+        if(RoomManager.Instance.remainingTime <= 0) return;
+        
         int minutes = Mathf.FloorToInt(RoomManager.Instance.remainingTime / 60f);
         int seconds = Mathf.FloorToInt(RoomManager.Instance.remainingTime - minutes * 60f);
 

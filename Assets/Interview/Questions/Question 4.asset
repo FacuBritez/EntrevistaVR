@@ -17,8 +17,9 @@ MonoBehaviour:
   - AnswerText: "Soy una persona colaborativa. Me gusta intercambiar ideas, aprender
       de los dem\xE1s, y encontrar soluciones conjuntas a los problemas."
     AnswerType: 0
-  - AnswerText: "Prefiero trabajar sola. Muchas veces los dem\xE1s solo entorpecen
-      el proceso, por lo que trabajar de forma individual es mi opci\xF3n preferida."
+  - AnswerText: "Prefiero trabajar de forma individual. Muchas veces los dem\xE1s
+      solo entorpecen el proceso, por lo que trabajar de forma individual es mi opci\xF3n
+      preferida."
     AnswerType: 2
   - AnswerText: "Me adapto a lo que se necesite, puedo trabajar en equipo o de forma
       independiente. Depende de con qui\xE9n me toque trabajar, supongo."

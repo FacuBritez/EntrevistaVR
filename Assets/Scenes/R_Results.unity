@@ -390,12 +390,12 @@ MonoBehaviour:
       m_Name: Position
       m_Type: 0
       m_ExpectedControlType: Vector3
-      m_Id: 1fc616e4-3cc0-48e3-90f7-b09760ba6323
+      m_Id: 31b0dd3d-7c4b-4d81-9c51-329c9756b064
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings:
       - m_Name: 
-        m_Id: e465fbc7-6443-41e4-bd02-7c873694ad50
+        m_Id: 1b687504-ab8d-4856-967d-90a4f070ce65
         m_Path: <XRHMD>/centerEyePosition
         m_Interactions: 
         m_Processors: 
@@ -403,7 +403,7 @@ MonoBehaviour:
         m_Action: Position
         m_Flags: 0
       - m_Name: 
-        m_Id: f4b008c5-185f-4265-b41d-506468bd3ca3
+        m_Id: c817452d-c8ea-4d4b-889f-2ea01e3c163c
         m_Path: <HandheldARInputDevice>/devicePosition
         m_Interactions: 
         m_Processors: 
@@ -418,12 +418,12 @@ MonoBehaviour:
       m_Name: Rotation
       m_Type: 0
       m_ExpectedControlType: Quaternion
-      m_Id: b0ac9ae2-4913-4187-93fd-fe281316da4d
+      m_Id: d2095ab2-cd04-42aa-a6f9-7bd33e070d78
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings:
       - m_Name: 
-        m_Id: 8c7ca67a-12c1-40c0-98a1-ebe7016d7fdb
+        m_Id: acc6f53d-cdfe-4449-abd6-b14753a114f8
         m_Path: <XRHMD>/centerEyeRotation
         m_Interactions: 
         m_Processors: 
@@ -431,7 +431,7 @@ MonoBehaviour:
         m_Action: Rotation
         m_Flags: 0
       - m_Name: 
-        m_Id: 81287dcc-524b-4ce9-8e8e-cb7b16eee49e
+        m_Id: 32423041-082e-42b7-9ec1-97bfb8512b47
         m_Path: <HandheldARInputDevice>/deviceRotation
         m_Interactions: 
         m_Processors: 
@@ -446,12 +446,12 @@ MonoBehaviour:
       m_Name: Tracking State
       m_Type: 0
       m_ExpectedControlType: Integer
-      m_Id: 5ba89104-40d9-4c24-8e99-64e448d236bc
+      m_Id: 20d4c788-a627-4a83-9f00-95c3ce0b5ada
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings:
       - m_Name: 
-        m_Id: fb4498aa-2f7d-46a4-a4be-3d4cf83d8e6b
+        m_Id: 77c9c77f-e4ba-4560-8b9e-a7acd74af667
         m_Path: <XRHMD>/trackingState
         m_Interactions: 
         m_Processors: 

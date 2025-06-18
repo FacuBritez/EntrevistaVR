@@ -7,6 +7,16 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Almohada
+    second: {fileID: 2100000, guid: abd4fbdf547220b459195067e6b23c4c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cama
+    second: {fileID: 2100000, guid: c0ddace938e4f734cb10efd5e7fbe4cb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Material.001
     second: {fileID: 2100000, guid: 50fbe0290ee30194090036556cd283cd, type: 2}
   - first:
@@ -14,6 +24,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Cama
     second: {fileID: 2800000, guid: 073598f3970981942ba168f3bb2d4a7e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: cama
+    second: {fileID: 2800000, guid: ff77e7c6c9dc7fc4fa786c17c37a78e0, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

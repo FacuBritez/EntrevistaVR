@@ -20,7 +20,7 @@ MonoBehaviour:
   - AnswerText: "No s\xE9, lo que me paguen est\xE1 bien. No soy una persona ambiciosa,
       solo quiero tener dinero para poder manejarme de forma independiente."
     AnswerType: 2
-  - AnswerText: "He investigado, aunque no tengo una cifra. espero que la propuesta
+  - AnswerText: "He investigado, aunque no tengo una cifra. Espero que la propuesta
       econ\xF3mica est\xE9 alineada con el mercado y las exigencias del puesto."
     AnswerType: 1
   Responses:
