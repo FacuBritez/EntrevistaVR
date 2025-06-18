@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
 [RequireComponent(typeof(XRGrabInteractable))]
-public class PickUp : MonoBehaviour
+public class RoomPickUp : MonoBehaviour
 {
     XRGrabInteractable interactable;
 
@@ -22,7 +22,7 @@ public class PickUp : MonoBehaviour
     private void OnTriggerStay(Collider other) 
     {
         if (interactable.isSelected) return;
-        if (!other.transform.root.TryGetComponent(out Player player)) return;
+        if (!other.transform.root.TryGetComponent(out RoomPlayer player)) return;
 
         if (player.TryToPickUp(this))
         {

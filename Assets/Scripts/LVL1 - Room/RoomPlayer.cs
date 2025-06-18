@@ -3,16 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class RoomPlayer : MonoBehaviour
 {
-    public static Player Instance  { get; private set; }
+    public static RoomPlayer Instance  { get; private set; }
 
-    public event Action<List<PickUp>> onItemGrabbed = delegate { };
+    public event Action<List<RoomPickUp>> onItemGrabbed = delegate { };
 
     [SerializeField] Transform pickUpZone;
     [SerializeField] Vector3 pickupZoneOffset;
 
-    public List<PickUp> grabbedItems;
+    public List<RoomPickUp> grabbedItems;
 
     private void Awake() 
     {
@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
         pickUpZone.forward = cameraForward;
     }
 
-    public bool TryToPickUp(PickUp pickup)
+    public bool TryToPickUp(RoomPickUp pickup)
     {
         var desiredItems = RoomManager.Instance.desiredItems;
         

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
 [RequireComponent(typeof(XRSimpleInteractable))]
-public class Exit : MonoBehaviour
+public class RoomExit : MonoBehaviour
 {
     XRSimpleInteractable interactable;
 

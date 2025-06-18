@@ -7,8 +7,8 @@ public class ResetPlayerPosition : MonoBehaviour
 {
     [SerializeField] InputActionAsset actions;
 
-    [Space]
-    [SerializeField] Transform cameraTransform;
+    
+    Transform cameraTransform => Camera.main.transform;
 
     Vector3 initialPosition;
 

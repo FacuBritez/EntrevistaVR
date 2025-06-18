@@ -11,7 +11,7 @@ public class RoomManager : MonoBehaviour
     public float remainingTime { get; private set; }
 
     [SerializeField] float timeLimit;
-    public List<PickUp> desiredItems;
+    public List<RoomPickUp> desiredItems;
 
     private void Awake() 
     {
@@ -36,14 +36,14 @@ public class RoomManager : MonoBehaviour
     public void CountItems()
     {
         MissingObjects.Clear();
-        var gottenItems = Player.Instance.grabbedItems;
+        var gottenItems = RoomPlayer.Instance.grabbedItems;
 
         if(gottenItems.Count != desiredItems.Count)
         {
             MissingObjects = desiredItems.Where(x => !gottenItems.Contains(x)).Select(x => x.name).ToList();
         }
 
-        SceneManager.LoadScene("R_Results");
+        SceneManager.LoadScene("LVL1_Results");
     }
 
     public static List<string> MissingObjects = new();

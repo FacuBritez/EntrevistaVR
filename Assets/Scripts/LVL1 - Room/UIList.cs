@@ -10,12 +10,12 @@ public class UIList : MonoBehaviour
 
     private void Start() 
     {
-        Player.Instance.onItemGrabbed += (items) => UpdateList(items, RoomManager.Instance.desiredItems);
+        RoomPlayer.Instance.onItemGrabbed += (items) => UpdateList(items, RoomManager.Instance.desiredItems);
 
-        UpdateList(new List<PickUp>(), RoomManager.Instance.desiredItems);
+        UpdateList(new List<RoomPickUp>(), RoomManager.Instance.desiredItems);
     }
 
-    void UpdateList(List<PickUp> grabbedItems, List<PickUp> desiredItems)
+    void UpdateList(List<RoomPickUp> grabbedItems, List<RoomPickUp> desiredItems)
     {
         string result = "";
 

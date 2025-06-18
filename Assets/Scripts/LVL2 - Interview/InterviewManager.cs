@@ -44,7 +44,7 @@ public class InterviewManager : MonoBehaviour
 
         if(currentQuestionIndex > questions.Length)
         {
-            SceneManager.LoadScene("I_Results");
+            SceneManager.LoadScene("LVL2_Results");
             return;
         }
 
@@ -64,8 +64,6 @@ public class InterviewManager : MonoBehaviour
         {
             Score--;
         }
-
-        Debug.Log(Score);
 
         string response = currentQuestion.Responses.Where(x => x.ResponseType == questionPicked)?.FirstOrDefault().ResponseText;
         showText.Invoke(response, true);
