@@ -16,8 +16,6 @@ public class InterviewResults : MonoBehaviour
 
         int score = InterviewManager.Score;
 
-        Debug.Log(score);
-
         if(score < minNeutralEnding)
         {
 			Debug.Log("bad");

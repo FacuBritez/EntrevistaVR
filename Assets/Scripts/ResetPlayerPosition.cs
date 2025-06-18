@@ -17,12 +17,19 @@ public class ResetPlayerPosition : MonoBehaviour
         initialPosition = transform.position;
     }
 
-    private void Start() 
+    private void OnEnable() 
     {
-		actions.FindActionMap("XRI LeftHand Interaction").FindAction("Reposition").performed += (x) => ResetPosition();
+		actions.FindActionMap("XRI LeftHand Interaction").FindAction("Reposition").performed += CallResetPosition;
 
 		Invoke("ResetPosition", 0.5f);
     }
+
+    private void OnDisable()
+    {
+        actions.FindActionMap("XRI LeftHand Interaction").FindAction("Reposition").performed -= CallResetPosition;
+    }
+
+    void CallResetPosition(InputAction.CallbackContext context) => ResetPosition();
 
     public void ResetPosition()
     {
