@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 
 public class LVL3Manager : MonoBehaviour
@@ -31,8 +32,8 @@ public class LVL3Manager : MonoBehaviour
         new string[] { "Palabra4", "Palabra5", "Palabra6" },
         new string[] { "Palabra7", "Palabra8", "Palabra9" }
     };
-    
-    
+
+
 
     // Patron Singleton para que solo haya una instancia de este manager
     void Awake()
@@ -71,9 +72,12 @@ public class LVL3Manager : MonoBehaviour
 
             GameObject obj = Instantiate(answerPrefab, position, Quaternion.identity);
             obj.transform.localScale = Vector3.zero; // Escalado inicial a 0
-
             // Animación de escalado para que aparezca
             StartCoroutine(ScaleAnimation(obj.transform, Vector3.one, 0.5f));
+
+            // Asignar la palabra al objeto
+            TextMeshProUGUI texto = obj.GetComponentInChildren<TextMeshProUGUI>();
+            texto.text = words[i];      
         }
     }
 
