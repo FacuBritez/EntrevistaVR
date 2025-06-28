@@ -7,8 +7,11 @@ using TMPro;
 public class LVL3Manager : MonoBehaviour
 {
     public static LVL3Manager instance; // static para que la variable sea de la clase en si, y no del objeto.
+    [SerializeField] CVType[] CV;
     [Space]
-    [SerializeField] GameObject answerPrefab;
+    [SerializeField] CVPalabra answerPrefab;
+    [Space]
+    [SerializeField] CVCanvas canvas;
 
     [Header("Rango de aparición de las palabras")]
     [Space]
@@ -26,12 +29,10 @@ public class LVL3Manager : MonoBehaviour
     [Space]
     // Para pruebas, reemplazar InstanciarPalabras(words[seccion]) por amount
     [SerializeField] int amount;
-    private string[][] words = new string[][]
-    {
-        new string[] { "Palabra1", "Palabra2", "Palabra3" },
-        new string[] { "Palabra4", "Palabra5", "Palabra6" },
-        new string[] { "Palabra7", "Palabra8", "Palabra9" }
-    };
+
+    //---------
+
+    CVType currentCV; 
 
 
 
@@ -50,8 +51,11 @@ public class LVL3Manager : MonoBehaviour
     private IEnumerator Game()
     {
         int seccion = 0; // Sección actual del juego
-        StartCoroutine(InstanciarPalabras(words[seccion]));
-        yield return null;
+
+        currentCV = CV[Random.Range(0, CV.Length)];
+        canvas.SetText(currentCV);
+
+        yield return InstanciarPalabras(GetOptions(currentCV));
     }
 
     private IEnumerator InstanciarPalabras(string[] words)
@@ -68,16 +72,17 @@ public class LVL3Manager : MonoBehaviour
             Vector3 direction = rotation * Vector3.forward;
 
             float distance = Random.Range(minRange, maxRange);
-            Vector3 position = direction * distance;
+            Vector3 position = transform.position + direction * distance;
 
-            GameObject obj = Instantiate(answerPrefab, position, Quaternion.identity);
-            obj.transform.localScale = Vector3.zero; // Escalado inicial a 0
-            // Animación de escalado para que aparezca
-            StartCoroutine(ScaleAnimation(obj.transform, Vector3.one, 0.5f));
+            CVPalabra obj = Instantiate(answerPrefab, position, Quaternion.identity);
 
             // Asignar la palabra al objeto
-            TextMeshProUGUI texto = obj.GetComponentInChildren<TextMeshProUGUI>();
-            texto.text = words[i];      
+            obj.Text.text = words[i];
+
+            // Animación de escalado para que aparezca
+            yield return ScaleAnimation(obj.transform, obj.transform.localScale, 0.5f);
+
+
         }
     }
 
@@ -98,12 +103,26 @@ public class LVL3Manager : MonoBehaviour
         obj.localScale = targetScale;
     }
 
+    string[] GetOptions(CVType cv)
+    {
+        List<string> options = new();
+
+        options.AddRange(cv.SobreMi.Palabras);
+        options.AddRange(cv.ExpLaboral);
+        options.AddRange(cv.Formaciones);
+        options.AddRange(cv.Cursos);
+
+        return options.ToArray();
+
+    }
+
+
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(Vector3.zero, minRange);
+        Gizmos.DrawWireSphere(transform.position, minRange);
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(Vector3.zero, maxRange);
+        Gizmos.DrawWireSphere(transform.position, maxRange);
 
         Gizmos.color = Color.yellow;
         Vector3 dir1 = Quaternion.Euler(minVerticalAngle, minHorizontalAngle, 0) * Vector3.forward;
@@ -113,11 +132,11 @@ public class LVL3Manager : MonoBehaviour
         Vector3 dir5 = Quaternion.Euler(minVerticalAngle, 180, 0) * Vector3.forward;
         Vector3 dir6 = Quaternion.Euler(maxVerticalAngle, 180, 0) * Vector3.forward;
 
-        Gizmos.DrawLine(Vector3.zero, dir1 * maxRange);
-        Gizmos.DrawLine(Vector3.zero, dir2 * maxRange);
-        Gizmos.DrawLine(Vector3.zero, dir3 * maxRange);
-        Gizmos.DrawLine(Vector3.zero, dir4 * maxRange);
-        Gizmos.DrawLine(Vector3.zero, dir5 * maxRange);
-        Gizmos.DrawLine(Vector3.zero, dir6 * maxRange);
+        Gizmos.DrawLine(transform.position, transform.position + dir1 * maxRange);
+        Gizmos.DrawLine(transform.position, transform.position + dir2 * maxRange);
+        Gizmos.DrawLine(transform.position, transform.position + dir3 * maxRange);
+        Gizmos.DrawLine(transform.position, transform.position + dir4 * maxRange);
+        Gizmos.DrawLine(transform.position, transform.position + dir5 * maxRange);
+        Gizmos.DrawLine(transform.position, transform.position + dir6 * maxRange);
     }
 }
