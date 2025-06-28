@@ -25,11 +25,6 @@ public class LVL3Manager : MonoBehaviour
     [SerializeField] float minVerticalAngle = -25f;
     [SerializeField] float maxVerticalAngle = -10f;
 
-    [Header("Variables temporales para el desarrollo")]
-    [Space]
-    // Para pruebas, reemplazar InstanciarPalabras(words[seccion]) por amount
-    [SerializeField] int amount;
-
     //---------
 
     CVType currentCV; 
@@ -50,8 +45,6 @@ public class LVL3Manager : MonoBehaviour
 
     private IEnumerator Game()
     {
-        int seccion = 0; // Sección actual del juego
-
         currentCV = CV[Random.Range(0, CV.Length)];
         canvas.SetText(currentCV);
 

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a77387ba765a4641b6ad33da38438cc, type: 3}
+  m_Name: "CVDise\xF1oGrafico"
+  m_EditorClassIdentifier: 
+  SobreMi:
+    Parrafo: "Desde chica me expres\xE9 a trav\xE9s del dibujo. Hoy encontr\xE9 en
+      el dise\xF1o una forma de contar historias visuales. Me encanta trabajar con
+      colores, ideas y herramientas que me permitan dar identidad a los proyectos."
+    Palabras:
+    - p1
+    - p2
+  Formaciones:
+  - "Dise\xF1o Gr\xE1fico \u2013 Cursando 2\xBA a\xF1o en FADU - UBA (2023 - actualidad)"
+  - "Tecnicatura en Dise\xF1o Multimedial \u2013 Da Vinci (2022 - actualidad)"
+  - "Escuela Secundaria con orientaci\xF3n en Artes Visuales \u2013 ESEA Lola Mora
+    (Finalizado en 2021)"
+  ExpLaboral:
+  - "Dise\xF1adora freelance para redes sociales de emprendimientos (2023)\r\n <i>Tareas:
+    dise\xF1o de flyers, banners y contenido para Instagram</i>"
+  - "Colaboraci\xF3n en proyectos gr\xE1ficos escolares (2021-2022)\r\n <i>Tareas:
+    dise\xF1o de afiches y presentaciones digitales</i>"
+  - "Ayudante de dise\xF1o en imprenta barrial (2022)\r\n <i>Tareas: maquetaci\xF3n
+    b\xE1sica e impresi\xF3n de tarjetas y volantes</i>"
+  Cursos:
+  - "Curso de Photoshop e Illustrator \u2013 CCEBA (2023)"
+  - "Taller de branding para emprendedores \u2013 Puerta 18 (2024)"
+  - "Canva avanzado para redes sociales \u2013 online (2023)"
+  OpcionesIncorrectas: []
