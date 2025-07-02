@@ -17,33 +17,6 @@ public class PlayerNinja : MonoBehaviour
     float errors;
 
 
-    [SerializeField]
-    SuctionGun mySuctionGun;
-
-    [SerializeField]
-    Sword mySword;
-
-    /// <summary>
-    /// Awake is called when the script instance is being loaded.
-    /// </summary>
-    void Awake()
-    {
-
-    }
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-
     public void UpdateValues(bool isError, bool isObstacle)
     {
         if (isError)
