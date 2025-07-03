@@ -14,11 +14,20 @@ public class CVType : ScriptableObject
     [TextArea] public string[] OpcionesIncorrectas;
 
     [System.Serializable]
+
     public struct DataSobreMi
     {
-        [TextArea] public string Parrafo;
+        [TextArea] public string[] Oraciones;
         [TextArea] public string[] Palabras;
 
+    }
+
+    public enum CVFields
+    {
+        SobreMi,
+        Formaciones,
+        ExpLaboral,
+        Cursos
     }
 }    
 

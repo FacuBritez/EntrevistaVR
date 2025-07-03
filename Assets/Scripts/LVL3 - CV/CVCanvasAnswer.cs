@@ -4,60 +4,72 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit;
+
+[RequireComponent(typeof(TMP_Text))]
+[RequireComponent(typeof(BoxCollider))]
+
 
 public class CVCanvasAnswer : MonoBehaviour
 {
+    TMP_Text textMesh;
 
-    [SerializeField] TMP_Text[] meshes;
-    [Space]
-    [SerializeField] string defaultString;
+
+    // --- 
+
+    [SerializeField] CVType.CVFields field;
+
     // ---
 
-    string[] correctAnswers;
+    public CVPalabra PalabraActual { get; private set; }
 
-    // --
+    void OnValidate()
+    {
+        var rectTransform = transform as RectTransform;
+
+        var collider = GetComponent<BoxCollider>();
+        collider.isTrigger = true;
+        collider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
+    }
+
 
     void Awake()
     {
-        foreach (var mesh in meshes)
-        {
-            mesh.text = defaultString;
-        }
+        textMesh = GetComponent<TMP_Text>();
     }
 
-    public void SetCorrectAnswers(string[] answers)
-    {
-        correctAnswers = (string[])answers.Clone();
-    }
 
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)
     {
         if (!other.TryGetComponent(out CVPalabra palabra)) return;
-        if (!correctAnswers.Contains(palabra.Text.text)) return;
+        if (palabra.GetComponent<XRGrabInteractable>().isSelected) return;
+        if (PalabraActual != null) return;
 
-        var availableSlots = meshes.Where(x => x.text == defaultString).FirstOrDefault();
-
-        if (availableSlots == null) return;
-        availableSlots.text = palabra.Text.text;
-
-        other.gameObject.SetActive(false);
+        PlacePalabra(palabra);
     }
 
-    // ---
 
-    public void SetTexts(string[] strings)
+    public void PlacePalabra(CVPalabra palabra) {
+
+        palabra.GetComponent<LookAtCamera>().enabled = false;
+        palabra.transform.forward = -Vector3.forward;
+
+        palabra.transform.position = transform.position;
+
+        PalabraActual = palabra;
+
+        palabra.GetComponent<XRGrabInteractable>().selectEntered.AddListener(TakePalabra);
+    }
+    
+    public void TakePalabra(SelectEnterEventArgs args)
     {
-        for (int i = 0; i < meshes.Length; i++)
-        {
-            TMP_Text currentText = meshes[i];
+        PalabraActual.GetComponent<XRGrabInteractable>().selectEntered.RemoveListener(TakePalabra);
 
-            currentText.text = strings[i];
-        }
+        PalabraActual.GetComponentInParent<LookAtCamera>().enabled = true;
+        PalabraActual = null;
     }
 
-    public void SetText(string input)
-    {
-        meshes[0].text = input;
-    }
+
 }
+
 

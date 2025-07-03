@@ -6,5 +6,17 @@ using UnityEngine.UI;
 
 public class CVPalabra : MonoBehaviour
 {
-    public TMP_Text Text;
+    [SerializeField] TMP_Text TextMesh;
+
+    // ---
+
+    public CVType.CVFields fieldType { get; private set; }
+
+    // ---
+
+    public void SetText(string text, CVType.CVFields sourceField)
+    {
+        TextMesh.text = text;
+        fieldType = sourceField;
+    }
 }

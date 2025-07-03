@@ -12,9 +12,6 @@ public class CVCanvas : MonoBehaviour
 
     public void SetText(CVType CV)
     {
-        sobreMi.SetCorrectAnswers(CV.SobreMi.Palabras);
-        formaciones.SetCorrectAnswers(CV.Formaciones);
-        experiencias.SetCorrectAnswers(CV.ExpLaboral);
-        cursos.SetCorrectAnswers(CV.Cursos);
+        
     }
 }
