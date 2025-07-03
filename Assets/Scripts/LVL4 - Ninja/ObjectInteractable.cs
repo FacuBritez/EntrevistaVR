@@ -24,7 +24,7 @@ public class ObjectInteractable : MonoBehaviour
 
     void Update()
     {
-        transform.position = Vector3.MoveTowards(this.transform.position, target, objectSpeed);
+        transform.position = Vector3.MoveTowards(this.transform.position, target, objectSpeed*Time.deltaTime);
 
     }
 

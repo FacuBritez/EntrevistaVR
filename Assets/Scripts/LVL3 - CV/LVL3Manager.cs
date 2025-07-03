@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 
 public class LVL3Manager : MonoBehaviour
@@ -51,7 +52,7 @@ public class LVL3Manager : MonoBehaviour
         yield return InstanciarPalabras(GetOptions(currentCV));
     }
 
-    private IEnumerator InstanciarPalabras(string[] words)
+    private IEnumerator InstanciarPalabras(KeyValuePair<string, CVType.CVFields>[] words)
     {
         // Espera antes de empezar a instaciar las palabras
         yield return new WaitForSeconds(1f);
@@ -70,11 +71,10 @@ public class LVL3Manager : MonoBehaviour
             CVPalabra obj = Instantiate(answerPrefab, position, Quaternion.identity);
 
             // Asignar la palabra al objeto
-            obj.Text.text = words[i];
+            obj.SetText(words[i].Key, words[i].Value);
 
             // Animación de escalado para que aparezca
             yield return ScaleAnimationAppears(obj.transform, 0.5f);
-
 
         }
     }
@@ -113,17 +113,22 @@ public class LVL3Manager : MonoBehaviour
     }
 
 
-    string[] GetOptions(CVType cv)
+    KeyValuePair<string, CVType.CVFields>[] GetOptions(CVType cv)
     {
-        List<string> options = new();
+        List<KeyValuePair<string, CVType.CVFields>> options = new();
 
-        options.AddRange(cv.SobreMi.Palabras);
-        options.AddRange(cv.ExpLaboral);
-        options.AddRange(cv.Formaciones);
-        options.AddRange(cv.Cursos);
+        options.AddRange(StringsToValuePairs(cv.SobreMi.Palabras, CVType.CVFields.SobreMi));
+        options.AddRange(StringsToValuePairs(cv.ExpLaboral, CVType.CVFields.ExpLaboral));
+        options.AddRange(StringsToValuePairs(cv.Formaciones, CVType.CVFields.Formaciones));
+        options.AddRange(StringsToValuePairs(cv.Cursos, CVType.CVFields.Cursos));
 
         return options.ToArray();
 
+    }
+
+    KeyValuePair<string, CVType.CVFields>[] StringsToValuePairs(string[] input, CVType.CVFields field)
+    {
+        return input.Select(x => new KeyValuePair<string, CVType.CVFields>(x, field)).ToArray();    
     }
 
 

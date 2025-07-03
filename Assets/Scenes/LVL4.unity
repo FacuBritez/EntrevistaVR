@@ -226,13 +226,13 @@ MonoBehaviour:
   ObjectPrefab: {fileID: 1869273202030861836, guid: a321312ff3b21e147984af6844404543,
     type: 3}
   CameraPosition: {x: 0, y: 0, z: 0}
-  cameraHeightMultiplier: 0.33333
+  cameraHeightMultiplier: 0.45
   currentStage: 3
   StageSettingsArray:
-  - {x: 3.5, y: 1.5, z: 2.5}
-  - {x: 3, y: 1.5, z: 2.5}
-  - {x: 2.5, y: 1.5, z: 2.5}
-  - {x: 2, y: 3, z: 5}
+  - {x: 3.5, y: 165, z: 275}
+  - {x: 3, y: 165, z: 275}
+  - {x: 2.5, y: 165, z: 275}
+  - {x: 2, y: 415, z: 700}
 --- !u!1 &229217237
 GameObject:
   m_ObjectHideFlags: 0
@@ -2544,8 +2544,6 @@ MonoBehaviour:
   PositiveText: {fileID: 691542538}
   NegativeText: {fileID: 1591815457}
   ErrorText: {fileID: 1269637653}
-  mySuctionGun: {fileID: 0}
-  mySword: {fileID: 0}
 --- !u!114 &1402056601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2558,8 +2556,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fc2215f4b36aca4a817e2f73ebb92d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalTime: 120
-  timerText: {fileID: 506247150}
 --- !u!1 &1447137781
 GameObject:
   m_ObjectHideFlags: 0
