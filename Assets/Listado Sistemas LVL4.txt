@@ -1,0 +1,40 @@
+Sistemas que necesitamos:
+
+Spawneo de Elementos (Positivos y Negativos), Random cortitos.
+Elementos (Positivos y Negativos). Velocidad variada.
+Interacción con Elementos (Corte y Succión)
+	Espada Láser
+	Pistola Micrófono Parabólico de Ondas
+
+
+Energía Mental/Vida(Al equivocarse o ignorar obstáculos baja, modificando el escenario a su vez)
+Timer
+Puntos/Cantidad Aciertos
+Condicion de Victoria: X puntos en el Tiempo determinado.
+
+
+Aumento de frecuencia de spawneo en base a absorciones correctas seguidas.
+
+Absorber correctamente aumenta la frecuencia de spawneo.
+No cortar malo o absorberlo reinicia la velocidad y saca vida.
+No absorber algo bueno o cortarlo reinicia la velocidad (SIN SACAR VIDA).
+
+
+Baja la oscuridad en base a la velocidad.
+Velocidad 1 (Default): Nubes, tormenta, rayos.
+Velocidad 2: Nubes y tormenta.
+Velocidad 3: Nubes (menos)
+Velocidad 4: Claro.
+
+
+
+ABSORBER DA CLARIDAD!
+Confundirse pierde claridad
+CLARIDAD = BUENO
+NUBES Y TORMENTA = MALO
+
+
+Proyectiles:
+
+Los proyectiles tienen velocidad random definida al inicio.
+QUIZAS si son muy rapidos deberian spawnear mas atras

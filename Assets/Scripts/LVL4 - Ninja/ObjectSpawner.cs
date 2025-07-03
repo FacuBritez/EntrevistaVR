@@ -21,15 +21,15 @@ public class ObjectSpawner : MonoBehaviour
     [SerializeField]
     float cameraHeightMultiplier;
 
-    
+
 
 
     [Header("Game Difficulty Settings")]
     //Dato x = Velocidad, Dato y = Frequencia
     public int currentStage;
 
-    [Tooltip("x = Frequencia, y = VelocidadMinima, z = VelocidadMaxima")]
-    public Vector3[] StageSettingsArray;
+    [Tooltip("x = Frequencia, y = VelocidadMinima, z = VelocidadMaxima, w = ComboParaSubirDeStage")]
+    public Vector4[] StageSettingsArray;
 
 
     float timeAux;
@@ -91,5 +91,28 @@ public class ObjectSpawner : MonoBehaviour
         }
 
         return speed;
+    }
+
+    public void StageUp()
+    {
+        if (currentStage != 3)
+        {
+            currentStage++;
+        }
+    }
+    public void StageDown()
+    {
+        if (currentStage != 0)
+        {
+            currentStage--;
+        }
+    }
+
+    public void Hit(int Combo)
+    {
+        if (Combo >= StageSettingsArray[currentStage].w)
+        {
+            StageUp();
+        }
     }
 }

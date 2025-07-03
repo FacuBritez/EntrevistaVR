@@ -7,12 +7,14 @@ public class ObjectInteractable : MonoBehaviour
     public Vector3 target;
 
     public float objectSpeed;
+    [SerializeField] float rotationSpeed;
     public bool isObstacle;
 
+
     [SerializeField]
-    GameObject[] NegativeMeshes;
+    GameObject NegativeMeshesParent;
     [SerializeField]
-    GameObject[] PositiveMeshes;
+    GameObject PositiveMeshesParent;
     void Awake()
     {
         SetObjectType();
@@ -20,12 +22,19 @@ public class ObjectInteractable : MonoBehaviour
     void Start()
     {
         Destroy(this.gameObject, 45f);
+        transform.rotation = Quaternion.Euler(Random.Range(0,360), Random.Range(0,360), Random.Range(0,360));
     }
 
     void Update()
     {
-        transform.position = Vector3.MoveTowards(this.transform.position, target, objectSpeed);
 
+        transform.position = Vector3.MoveTowards(this.transform.position, target, objectSpeed * Time.deltaTime);
+        transform.Rotate(new Vector3(1, 1, 1) * rotationSpeed * Time.deltaTime);
+        
+        if (Vector3.Distance(this.transform.position, target) < 0.05)
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     void SetObjectType()
@@ -33,13 +42,17 @@ public class ObjectInteractable : MonoBehaviour
         GameObject SpawnedMesh;
         if (Random.Range(0, 2) == 0)
         {
+            //NEGATIVO
             isObstacle = true;
-            SpawnedMesh = Instantiate(NegativeMeshes[Random.Range(0, NegativeMeshes.Length)],this.transform);
+            SpawnedMesh = NegativeMeshesParent.transform.GetChild(Random.Range(0, NegativeMeshesParent.transform.childCount)).gameObject;
+            SpawnedMesh.SetActive(true);
         }
         else
         {
+            //POSITIVO
             isObstacle = false;
-            SpawnedMesh = Instantiate(PositiveMeshes[Random.Range(0, PositiveMeshes.Length)],this.transform);
+            SpawnedMesh = PositiveMeshesParent.transform.GetChild(Random.Range(0, PositiveMeshesParent.transform.childCount)).gameObject;
+            SpawnedMesh.SetActive(true);
         }
 
     }

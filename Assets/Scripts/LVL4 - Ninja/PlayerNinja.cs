@@ -5,36 +5,41 @@ using TMPro;
 
 public class PlayerNinja : MonoBehaviour
 {
-    [SerializeField]
-    TextMeshProUGUI PositiveText;
-    [SerializeField]
-    TextMeshProUGUI NegativeText;
-    [SerializeField]
-    TextMeshProUGUI ErrorText;
 
-    float positives;
-    float negatives;
-    float errors;
+    [SerializeField] ObjectSpawner Spawner;
 
+    [SerializeField]
+    TextMeshProUGUI ComboText;
+    [SerializeField]
+    TextMeshProUGUI ScoreText;
+
+    int positives;
+    int negatives;
+    int errors;
+    [SerializeField] int Combo;
 
     public void UpdateValues(bool isError, bool isObstacle)
     {
-        if (isError)
+        if (isError)    //ERROR
         {
             errors++;
-            ErrorText.text = errors.ToString();
+            Combo = 0;
+            ComboText.text = Combo.ToString();
+            Spawner.StageDown();
+            //ErrorText.text = errors.ToString();
         }
         else
         {
-            if (isObstacle)
+            Combo++;
+            ComboText.text = Combo.ToString();
+            Spawner.Hit(Combo);
+            if (isObstacle) //NEGATIVO ACERTADO
             {
                 negatives++;
-                NegativeText.text = negatives.ToString();
             }
-            else
+            else            //POSITIVO ACERTADO
             {
                 positives++;
-                PositiveText.text = positives.ToString();
             }
         }
     }
