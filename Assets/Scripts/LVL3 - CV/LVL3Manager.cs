@@ -27,7 +27,7 @@ public class LVL3Manager : MonoBehaviour
 
     //---------
 
-    CVType currentCV; 
+    CVType currentCV;
 
 
 
@@ -73,28 +73,45 @@ public class LVL3Manager : MonoBehaviour
             obj.Text.text = words[i];
 
             // Animación de escalado para que aparezca
-            yield return ScaleAnimation(obj.transform, obj.transform.localScale, 0.5f);
+            yield return ScaleAnimationAppears(obj.transform, 0.5f);
 
 
         }
     }
 
 
-    // Animación de escalado de un objeto
-    // Sirve tanto para que aparezca como para que desaparezca
-    private IEnumerator ScaleAnimation(Transform obj, Vector3 targetScale, float duration)
+    // Animación de escalado de un objeto al aparecer
+    private IEnumerator ScaleAnimationAppears(Transform obj, float duration)
     {
         float time = 0f;
-        Vector3 initialScale = obj.localScale;
+        Vector3 startScale = Vector3.zero;
+        Vector3 endScale = obj.localScale;
 
         while (time < duration)
         {
+            obj.localScale = Vector3.Lerp(startScale, endScale, time / duration);
             time += Time.deltaTime;
-            obj.localScale = Vector3.Lerp(initialScale, targetScale, time / duration);
             yield return null;
         }
-        obj.localScale = targetScale;
+        obj.localScale = endScale;
     }
+
+    // Animación de escalado de un objeto al desaparecer
+    private IEnumerator ScaleAnimationDesappears(Transform obj, float duration)
+    {
+        float time = 0f;
+        Vector3 startScale = obj.localScale;
+        Vector3 endScale = Vector3.zero;
+
+        while (time < duration)
+        {
+            obj.localScale = Vector3.Lerp(startScale, endScale, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        obj.localScale = endScale;
+    }
+
 
     string[] GetOptions(CVType cv)
     {
