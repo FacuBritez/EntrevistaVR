@@ -19,7 +19,7 @@ public class ObjectInteractable : MonoBehaviour
     }
     void Start()
     {
-        Destroy(this.gameObject, 20f);
+        Destroy(this.gameObject, 45f);
     }
 
     void Update()
