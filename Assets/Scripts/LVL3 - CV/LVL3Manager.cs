@@ -26,9 +26,11 @@ public class LVL3Manager : MonoBehaviour
     [SerializeField] float minVerticalAngle = -25f;
     [SerializeField] float maxVerticalAngle = -10f;
 
-    //---------
+    //---
 
     CVType currentCV;
+
+    // ---
 
 
 
@@ -74,50 +76,16 @@ public class LVL3Manager : MonoBehaviour
             obj.SetText(words[i].Key, words[i].Value);
 
             // Animación de escalado para que aparezca
-            yield return ScaleAnimationAppears(obj.transform, 0.5f);
+            obj.PlayAppearAnimation(0.5f);
 
         }
     }
-
-
-    // Animación de escalado de un objeto al aparecer
-    private IEnumerator ScaleAnimationAppears(Transform obj, float duration)
-    {
-        float time = 0f;
-        Vector3 startScale = Vector3.zero;
-        Vector3 endScale = obj.localScale;
-
-        while (time < duration)
-        {
-            obj.localScale = Vector3.Lerp(startScale, endScale, time / duration);
-            time += Time.deltaTime;
-            yield return null;
-        }
-        obj.localScale = endScale;
-    }
-
-    // Animación de escalado de un objeto al desaparecer
-    private IEnumerator ScaleAnimationDesappears(Transform obj, float duration)
-    {
-        float time = 0f;
-        Vector3 startScale = obj.localScale;
-        Vector3 endScale = Vector3.zero;
-
-        while (time < duration)
-        {
-            obj.localScale = Vector3.Lerp(startScale, endScale, time / duration);
-            time += Time.deltaTime;
-            yield return null;
-        }
-        obj.localScale = endScale;
-    }
-
 
     KeyValuePair<string, CVType.CVFields>[] GetOptions(CVType cv)
     {
         List<KeyValuePair<string, CVType.CVFields>> options = new();
 
-        options.AddRange(StringsToValuePairs(cv.SobreMi.Palabras, CVType.CVFields.SobreMi));
+        options.AddRange(StringsToValuePairs(cv.SobreMi, CVType.CVFields.SobreMi));
         options.AddRange(StringsToValuePairs(cv.ExpLaboral, CVType.CVFields.ExpLaboral));
         options.AddRange(StringsToValuePairs(cv.Formaciones, CVType.CVFields.Formaciones));
         options.AddRange(StringsToValuePairs(cv.Cursos, CVType.CVFields.Cursos));

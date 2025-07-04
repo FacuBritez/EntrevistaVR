@@ -8,34 +8,20 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 [RequireComponent(typeof(TMP_Text))]
 [RequireComponent(typeof(BoxCollider))]
-
-
 public class CVCanvasAnswer : MonoBehaviour
 {
-    TMP_Text textMesh;
-
-
-    // --- 
-
     [SerializeField] CVType.CVFields field;
 
     // ---
 
     public CVPalabra PalabraActual { get; private set; }
 
+    // ---
+
     void OnValidate()
     {
-        var rectTransform = transform as RectTransform;
-
         var collider = GetComponent<BoxCollider>();
         collider.isTrigger = true;
-        collider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
-    }
-
-
-    void Awake()
-    {
-        textMesh = GetComponent<TMP_Text>();
     }
 
 
@@ -48,8 +34,10 @@ public class CVCanvasAnswer : MonoBehaviour
         PlacePalabra(palabra);
     }
 
+    // ---
 
-    public void PlacePalabra(CVPalabra palabra) {
+    public void PlacePalabra(CVPalabra palabra)
+    {
 
         palabra.GetComponent<LookAtCamera>().enabled = false;
         palabra.transform.forward = -Vector3.forward;
@@ -59,10 +47,14 @@ public class CVCanvasAnswer : MonoBehaviour
         PalabraActual = palabra;
 
         palabra.GetComponent<XRGrabInteractable>().selectEntered.AddListener(TakePalabra);
+
+        palabra.PlayExpandAnimation(GetComponent<RectTransform>().sizeDelta * 0.003f, 0.5f);
     }
-    
+
     public void TakePalabra(SelectEnterEventArgs args)
     {
+        PalabraActual.PlayReverseExpandAnimation(0.5f);
+        
         PalabraActual.GetComponent<XRGrabInteractable>().selectEntered.RemoveListener(TakePalabra);
 
         PalabraActual.GetComponentInParent<LookAtCamera>().enabled = true;
