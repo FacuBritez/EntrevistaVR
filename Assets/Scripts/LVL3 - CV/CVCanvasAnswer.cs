@@ -6,17 +6,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
-[RequireComponent(typeof(TMP_Text))]
 [RequireComponent(typeof(BoxCollider))]
 
 
 public class CVCanvasAnswer : MonoBehaviour
 {
-    TMP_Text textMesh;
-
-
-    // --- 
-
     [SerializeField] CVType.CVFields field;
 
     // ---
@@ -29,15 +23,9 @@ public class CVCanvasAnswer : MonoBehaviour
 
         var collider = GetComponent<BoxCollider>();
         collider.isTrigger = true;
-        collider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
+        // Algunos collider son distintos, los comento para evitar ifs :P
+        //collider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
     }
-
-
-    void Awake()
-    {
-        textMesh = GetComponent<TMP_Text>();
-    }
-
 
     void OnTriggerStay(Collider other)
     {
