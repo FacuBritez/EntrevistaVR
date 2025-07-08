@@ -13,6 +13,9 @@ public class CVPalabra : MonoBehaviour
     [SerializeField] RectTransform canvasTransform;
 
     [Space]
+    [SerializeField] Animator correctionAnimator;
+
+    [Space]
     [SerializeField] AnimationCurve appearAnimCurve, expandAnimCurve;
 
     // ---
@@ -38,7 +41,28 @@ public class CVPalabra : MonoBehaviour
         fieldType = sourceField;
     }
 
+    public string GetText()
+    {
+        return TextMesh.text;
+    }
+
     // ---
+
+    public void ShowCorrection(string correction)
+    {
+        correctionAnimator.GetComponentInChildren<TMP_Text>().text = correction;
+
+        correctionAnimator.SetBool("Incorrect", true);
+    }
+
+    public void HideCorrection()
+    {
+        if (!correctionAnimator.GetBool("Incorrect")) return;
+
+        correctionAnimator.GetComponentInChildren<TMP_Text>().text = "";
+
+        correctionAnimator.SetBool("Incorrect", false);
+    }
 
     public void PlayAppearAnimation(float duration)
     {

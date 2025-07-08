@@ -49,16 +49,44 @@ public class CVCanvasAnswer : MonoBehaviour
         palabra.GetComponent<XRGrabInteractable>().selectEntered.AddListener(TakePalabra);
 
         palabra.PlayExpandAnimation(GetComponent<RectTransform>().sizeDelta * 0.003f, 0.5f);
+
+        if (!IsPalabraCorrectlyPlaced(palabra, out string errorReason))
+        {
+            palabra.ShowCorrection(errorReason);
+        }
     }
 
     public void TakePalabra(SelectEnterEventArgs args)
     {
         PalabraActual.PlayReverseExpandAnimation(0.5f);
-        
+        PalabraActual.HideCorrection();
+
         PalabraActual.GetComponent<XRGrabInteractable>().selectEntered.RemoveListener(TakePalabra);
 
         PalabraActual.GetComponentInParent<LookAtCamera>().enabled = true;
         PalabraActual = null;
+    }
+
+    bool IsPalabraCorrectlyPlaced(CVPalabra palabra, out string errorReason)
+    {
+        errorReason = "Respuesta incorrecta!";
+
+        var currentAnswerPool = LVL3Manager.instance.CurrentCV[field];
+        var currentAnswer = palabra.GetText();
+
+        if (!currentAnswerPool.Contains(currentAnswer))
+        {
+            errorReason = "Categoría incorrecta!";
+            return false;
+        }
+
+        if (currentAnswerPool.ToList().IndexOf(currentAnswer) != transform.GetSiblingIndex())
+        {
+            errorReason = "Orden incorrecto!";
+            return false;
+        }
+
+        return true;
     }
 
 

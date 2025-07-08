@@ -28,7 +28,7 @@ public class LVL3Manager : MonoBehaviour
 
     //---
 
-    CVType currentCV;
+    public Dictionary<CVType.CVFields, string[]> CurrentCV { get; private set; }
 
     // ---
 
@@ -48,55 +48,52 @@ public class LVL3Manager : MonoBehaviour
 
     private IEnumerator Game()
     {
-        currentCV = CV[Random.Range(0, CV.Length)];
-        canvas.SetText(currentCV);
+        var chosenCV = CV[Random.Range(0, CV.Length)];
+        CurrentCV = CVToDictionary(chosenCV);
 
-        yield return InstanciarPalabras(GetOptions(currentCV));
+        yield return InstanciarPalabras(CurrentCV);
     }
 
-    private IEnumerator InstanciarPalabras(KeyValuePair<string, CVType.CVFields>[] words)
+    private IEnumerator InstanciarPalabras(Dictionary<CVType.CVFields, string[]> dictionaryCV)
     {
         // Espera antes de empezar a instaciar las palabras
         yield return new WaitForSeconds(1f);
-        for (int i = 0; i < words.Length; i++)
+
+        foreach (var words in dictionaryCV)
         {
-            yield return new WaitForSeconds(0.5f); //Espera entre cada aparición
-            float horizontalAngle = Random.Range(minHorizontalAngle, maxHorizontalAngle);
-            float verticalAngle = Random.Range(minVerticalAngle, maxVerticalAngle);
+            foreach (var word in words.Value)
+            {
+                yield return new WaitForSeconds(0.5f); //Espera entre cada aparición
+                float horizontalAngle = Random.Range(minHorizontalAngle, maxHorizontalAngle);
+                float verticalAngle = Random.Range(minVerticalAngle, maxVerticalAngle);
 
-            Quaternion rotation = Quaternion.Euler(verticalAngle, horizontalAngle, 0);
-            Vector3 direction = rotation * Vector3.forward;
+                Quaternion rotation = Quaternion.Euler(verticalAngle, horizontalAngle, 0);
+                Vector3 direction = rotation * Vector3.forward;
 
-            float distance = Random.Range(minRange, maxRange);
-            Vector3 position = transform.position + direction * distance;
+                float distance = Random.Range(minRange, maxRange);
+                Vector3 position = transform.position + direction * distance;
 
-            CVPalabra obj = Instantiate(answerPrefab, position, Quaternion.identity);
+                CVPalabra obj = Instantiate(answerPrefab, position, Quaternion.identity);
 
-            // Asignar la palabra al objeto
-            obj.SetText(words[i].Key, words[i].Value);
+                // Asignar la palabra al objeto
+                obj.SetText(word, words.Key);
 
-            // Animación de escalado para que aparezca
-            obj.PlayAppearAnimation(0.5f);
-
+                // Animación de escalado para que aparezca
+                obj.PlayAppearAnimation(0.5f);
+            }
         }
     }
 
-    KeyValuePair<string, CVType.CVFields>[] GetOptions(CVType cv)
+    Dictionary<CVType.CVFields, string[]> CVToDictionary(CVType cv)
     {
-        List<KeyValuePair<string, CVType.CVFields>> options = new();
+        Dictionary<CVType.CVFields, string[]> options = new();
 
-        options.AddRange(StringsToValuePairs(cv.SobreMi, CVType.CVFields.SobreMi));
-        options.AddRange(StringsToValuePairs(cv.ExpLaboral, CVType.CVFields.ExpLaboral));
-        options.AddRange(StringsToValuePairs(cv.Formaciones, CVType.CVFields.Formaciones));
-        options.AddRange(StringsToValuePairs(cv.Cursos, CVType.CVFields.Cursos));
+        options.Add(CVType.CVFields.SobreMi, cv.SobreMi);
+        options.Add(CVType.CVFields.ExpLaboral, cv.ExpLaboral);
+        options.Add(CVType.CVFields.Formaciones, cv.Formaciones);
+        options.Add(CVType.CVFields.Cursos, cv.Cursos);
 
-        return options.ToArray();
-
-    }
-
-    KeyValuePair<string, CVType.CVFields>[] StringsToValuePairs(string[] input, CVType.CVFields field)
-    {
-        return input.Select(x => new KeyValuePair<string, CVType.CVFields>(x, field)).ToArray();    
+        return options;
     }
 
 
