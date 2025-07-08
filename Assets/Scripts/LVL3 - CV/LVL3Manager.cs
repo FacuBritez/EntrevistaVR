@@ -7,12 +7,17 @@ using System.Linq;
 
 public class LVL3Manager : MonoBehaviour
 {
-    public static LVL3Manager instance; // static para que la variable sea de la clase en si, y no del objeto.
+    public static LVL3Manager Instance; // static para que la variable sea de la clase en si, y no del objeto.
+
+    // ---
+
     [SerializeField] CVType[] CV;
     [Space]
     [SerializeField] CVPalabra answerPrefab;
+
+    [Header("Tiempo de juego")]
     [Space]
-    [SerializeField] CVCanvas canvas;
+    [SerializeField] float gameTime;
 
     [Header("Rango de aparición de las palabras")]
     [Space]
@@ -30,6 +35,8 @@ public class LVL3Manager : MonoBehaviour
 
     public Dictionary<CVType.CVFields, string[]> CurrentCV { get; private set; }
 
+    public float remainingTime { get; private set; }
+
     // ---
 
 
@@ -37,7 +44,7 @@ public class LVL3Manager : MonoBehaviour
     // Patron Singleton para que solo haya una instancia de este manager
     void Awake()
     {
-        if (instance == null) instance = this;
+        if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
@@ -52,6 +59,7 @@ public class LVL3Manager : MonoBehaviour
         CurrentCV = CVToDictionary(chosenCV);
 
         yield return InstanciarPalabras(CurrentCV);
+        yield return Timer();
     }
 
     private IEnumerator InstanciarPalabras(Dictionary<CVType.CVFields, string[]> dictionaryCV)
@@ -82,6 +90,20 @@ public class LVL3Manager : MonoBehaviour
                 obj.PlayAppearAnimation(0.5f);
             }
         }
+    }
+
+    private IEnumerator Timer()
+    {
+        remainingTime = gameTime;
+
+        while (remainingTime > 0f)
+        {
+            remainingTime -= Time.deltaTime;
+
+            yield return null;
+        }
+
+        remainingTime = 0f;
     }
 
     Dictionary<CVType.CVFields, string[]> CVToDictionary(CVType cv)

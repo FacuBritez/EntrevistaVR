@@ -71,7 +71,7 @@ public class CVCanvasAnswer : MonoBehaviour
     {
         errorReason = "Respuesta incorrecta!";
 
-        var currentAnswerPool = LVL3Manager.instance.CurrentCV[field];
+        var currentAnswerPool = LVL3Manager.Instance.CurrentCV[field];
         var currentAnswer = palabra.GetText();
 
         if (!currentAnswerPool.Contains(currentAnswer))
