@@ -12,6 +12,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class CVCanvasAnswer : MonoBehaviour
 {
     [SerializeField] CVType.CVFields field;
+    [SerializeField] Image image;
 
     // ---
 
@@ -27,15 +28,47 @@ public class CVCanvasAnswer : MonoBehaviour
         //collider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
     }
 
+    Coroutine fadeCoroutine;
+
     void OnTriggerStay(Collider other)
     {
         if (!other.TryGetComponent(out CVPalabra palabra)) return;
+
+        if (fadeCoroutine != null)
+            StopCoroutine(fadeCoroutine);
+        fadeCoroutine = StartCoroutine(Fade(1f));
+
         if (palabra.GetComponent<XRGrabInteractable>().isSelected) return;
         if (PalabraActual != null) return;
 
         PlacePalabra(palabra);
     }
 
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponent<CVPalabra>())
+        {
+            if (fadeCoroutine != null)
+                StopCoroutine(fadeCoroutine);
+            fadeCoroutine = StartCoroutine(Fade(0f));
+        }
+    }
+
+    IEnumerator Fade(float target)
+    {
+        float time = 0;
+        float duration = 0.15f;
+        float start = image.color.a;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            var color = image.color;
+            color.a = Mathf.Lerp(start, target, time / duration);
+            image.color = color;
+            yield return null;
+        }
+    }
 
     public void PlacePalabra(CVPalabra palabra) {
 
@@ -48,7 +81,7 @@ public class CVCanvasAnswer : MonoBehaviour
 
         palabra.GetComponent<XRGrabInteractable>().selectEntered.AddListener(TakePalabra);
     }
-    
+
     public void TakePalabra(SelectEnterEventArgs args)
     {
         PalabraActual.GetComponent<XRGrabInteractable>().selectEntered.RemoveListener(TakePalabra);
