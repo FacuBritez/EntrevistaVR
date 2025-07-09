@@ -18,6 +18,10 @@ public class CVPalabra : MonoBehaviour
     [Space]
     [SerializeField] AnimationCurve appearAnimCurve, expandAnimCurve;
 
+    [Space]
+    [SerializeField] AudioClip clip;
+    AudioSource audioSource;
+
     // ---
 
     public CVType.CVFields fieldType { get; private set; }
@@ -31,6 +35,9 @@ public class CVPalabra : MonoBehaviour
     private void Awake()
     {
         defaultScale = meshTransform.localScale;
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = clip;
+        audioSource.Play();
     }
 
     // ---
