@@ -11,6 +11,8 @@ public class CVCanvasAnswer : MonoBehaviour
 {
     [SerializeField] CVType.CVFields field;
     [SerializeField] Image image;
+    [SerializeField] Color colorNormal = Color.grey;
+    [SerializeField] Color colorHover = new Color(130f / 255f, 130f / 255f, 130f / 255f, 1f);
 
     // ---
 
@@ -32,7 +34,7 @@ public class CVCanvasAnswer : MonoBehaviour
 
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
-        fadeCoroutine = StartCoroutine(Fade(1f));
+        fadeCoroutine = StartCoroutine(Fade(colorHover));
 
         if (palabra.GetComponent<XRGrabInteractable>().isSelected) return;
         if (PalabraActual != null) return;
@@ -48,26 +50,28 @@ public class CVCanvasAnswer : MonoBehaviour
         {
             if (fadeCoroutine != null)
                 StopCoroutine(fadeCoroutine);
-            fadeCoroutine = StartCoroutine(Fade(0f));
+            fadeCoroutine = StartCoroutine(Fade(colorNormal));
         }
     }
 
-    IEnumerator Fade(float target)
+    IEnumerator Fade(Color targetColor)
     {
         float time = 0;
         float duration = 0.15f;
-        float start = image.color.a;
+        Color startColor = image.color;
+
         while (time < duration)
         {
             time += Time.deltaTime;
-            var color = image.color;
-            color.a = Mathf.Lerp(start, target, time / duration);
-            image.color = color;
+            image.color = Color.Lerp(startColor, targetColor, time / duration);
             yield return null;
         }
+
+        image.color = targetColor;
     }
 
-    public void PlacePalabra(CVPalabra palabra) {
+    public void PlacePalabra(CVPalabra palabra)
+    {
 
         palabra.GetComponent<LookAtCamera>().enabled = false;
         palabra.transform.forward = -Vector3.forward;
