@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class CVCanvas : MonoBehaviour
 {
-    [SerializeField] CVCanvasAnswer sobreMi, formaciones, experiencias, cursos;
-
     // ---
 
     public void SetText(CVType CV)

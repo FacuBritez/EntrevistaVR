@@ -13,12 +13,10 @@ MonoBehaviour:
   m_Name: "CVDise\xF1oGrafico"
   m_EditorClassIdentifier: 
   SobreMi:
-    Parrafo: "Desde chica me expres\xE9 a trav\xE9s del dibujo. Hoy encontr\xE9 en
-      el dise\xF1o una forma de contar historias visuales. Me encanta trabajar con
-      colores, ideas y herramientas que me permitan dar identidad a los proyectos."
-    Palabras:
-    - p1
-    - p2
+  - "Desde chica me expres\xE9 a trav\xE9s del dibujo."
+  - "Hoy encontr\xE9 en el dise\xF1o una forma de contar historias visuales."
+  - Me encanta trabajar con colores, ideas y herramientas que me permitan dar identidad
+    a los proyectos.
   Formaciones:
   - "Dise\xF1o Gr\xE1fico \u2013 Cursando 2\xBA a\xF1o en FADU - UBA (2023 - actualidad)"
   - "Tecnicatura en Dise\xF1o Multimedial \u2013 Da Vinci (2022 - actualidad)"

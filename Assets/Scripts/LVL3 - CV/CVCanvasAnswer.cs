@@ -7,8 +7,6 @@ using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
 [RequireComponent(typeof(BoxCollider))]
-
-
 public class CVCanvasAnswer : MonoBehaviour
 {
     [SerializeField] CVType.CVFields field;
@@ -18,14 +16,12 @@ public class CVCanvasAnswer : MonoBehaviour
 
     public CVPalabra PalabraActual { get; private set; }
 
+    // ---
+
     void OnValidate()
     {
-        var rectTransform = transform as RectTransform;
-
         var collider = GetComponent<BoxCollider>();
         collider.isTrigger = true;
-        // Algunos collider son distintos, los comento para evitar ifs :P
-        //collider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
     }
 
     Coroutine fadeCoroutine;
@@ -44,6 +40,7 @@ public class CVCanvasAnswer : MonoBehaviour
         PlacePalabra(palabra);
     }
 
+    // ---
 
     void OnTriggerExit(Collider other)
     {
@@ -80,14 +77,46 @@ public class CVCanvasAnswer : MonoBehaviour
         PalabraActual = palabra;
 
         palabra.GetComponent<XRGrabInteractable>().selectEntered.AddListener(TakePalabra);
+
+        palabra.PlayExpandAnimation(GetComponent<RectTransform>().sizeDelta * 0.003f, 0.5f);
+
+        if (!IsPalabraCorrectlyPlaced(palabra, out string errorReason))
+        {
+            palabra.ShowCorrection(errorReason);
+        }
     }
 
     public void TakePalabra(SelectEnterEventArgs args)
     {
+        PalabraActual.PlayReverseExpandAnimation(0.5f);
+        PalabraActual.HideCorrection();
+
         PalabraActual.GetComponent<XRGrabInteractable>().selectEntered.RemoveListener(TakePalabra);
 
         PalabraActual.GetComponentInParent<LookAtCamera>().enabled = true;
         PalabraActual = null;
+    }
+
+    bool IsPalabraCorrectlyPlaced(CVPalabra palabra, out string errorReason)
+    {
+        errorReason = "Respuesta incorrecta!";
+
+        var currentAnswerPool = LVL3Manager.Instance.CurrentCV[field];
+        var currentAnswer = palabra.GetText();
+
+        if (!currentAnswerPool.Contains(currentAnswer))
+        {
+            errorReason = "Categoría incorrecta!";
+            return false;
+        }
+
+        if (currentAnswerPool.ToList().IndexOf(currentAnswer) != transform.GetSiblingIndex())
+        {
+            errorReason = "Orden incorrecto!";
+            return false;
+        }
+
+        return true;
     }
 
 
