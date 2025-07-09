@@ -19,7 +19,9 @@ public class CVPalabra : MonoBehaviour
     [SerializeField] AnimationCurve appearAnimCurve, expandAnimCurve;
 
     [Space]
-    [SerializeField] AudioClip clip;
+    [SerializeField] AudioClip popSound;
+    [SerializeField] AudioClip writingSound;
+    [SerializeField] AudioClip correctingSound;
     AudioSource audioSource;
 
     // ---
@@ -36,7 +38,7 @@ public class CVPalabra : MonoBehaviour
     {
         defaultScale = meshTransform.localScale;
         audioSource = GetComponent<AudioSource>();
-        audioSource.clip = clip;
+        audioSource.clip = popSound;
         audioSource.Play();
     }
 
@@ -60,6 +62,9 @@ public class CVPalabra : MonoBehaviour
         correctionAnimator.GetComponentInChildren<TMP_Text>().text = correction;
 
         correctionAnimator.SetBool("Incorrect", true);
+
+        audioSource.clip = writingSound;
+        audioSource.Play();
     }
 
     public void HideCorrection()
@@ -69,6 +74,9 @@ public class CVPalabra : MonoBehaviour
         correctionAnimator.GetComponentInChildren<TMP_Text>().text = "";
 
         correctionAnimator.SetBool("Incorrect", false);
+
+        audioSource.clip = correctingSound;
+        audioSource.Play();
     }
 
     public void PlayAppearAnimation(float duration)

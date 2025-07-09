@@ -5731,7 +5731,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  clip: {fileID: 8300000, guid: 524066a4cc560f04c8eabf0127144bc1, type: 3}
+  popSound: {fileID: 8300000, guid: 524066a4cc560f04c8eabf0127144bc1, type: 3}
+  writingSound: {fileID: 8300000, guid: 635db20d80f9cc24e92969698a36091d, type: 3}
+  correctingSound: {fileID: 8300000, guid: 394bb52716fd9ed45a81ecafe7f26558, type: 3}
 --- !u!114 &-9085720553438918337
 MonoBehaviour:
   m_ObjectHideFlags: 0
