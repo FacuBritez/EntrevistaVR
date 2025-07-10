@@ -79,6 +79,7 @@ public class CVCanvasAnswer : MonoBehaviour
         palabra.transform.position = transform.position;
 
         PalabraActual = palabra;
+        palabra.IsPlaced = true;
 
         palabra.GetComponent<XRGrabInteractable>().selectEntered.AddListener(TakePalabra);
 
@@ -97,13 +98,22 @@ public class CVCanvasAnswer : MonoBehaviour
 
         PalabraActual.GetComponent<XRGrabInteractable>().selectEntered.RemoveListener(TakePalabra);
 
+        PalabraActual.IsPlaced = false;
+        
         PalabraActual.GetComponentInParent<LookAtCamera>().enabled = true;
         PalabraActual = null;
+    }
+
+    public bool CheckPalabra()
+    {
+        return IsPalabraCorrectlyPlaced(PalabraActual, out string reason);
     }
 
     bool IsPalabraCorrectlyPlaced(CVPalabra palabra, out string errorReason)
     {
         errorReason = "Respuesta incorrecta!";
+
+        if (palabra == null) return false;
 
         var currentAnswerPool = LVL3Manager.Instance.CurrentCV[field];
         var currentAnswer = palabra.GetText();

@@ -4,7 +4,6 @@ using UnityEngine;
 using TMPro;
 using System.Linq;
 
-
 public class LVL3Manager : MonoBehaviour
 {
     public static LVL3Manager Instance; // static para que la variable sea de la clase en si, y no del objeto.
@@ -18,6 +17,8 @@ public class LVL3Manager : MonoBehaviour
     [Header("Tiempo de juego")]
     [Space]
     [SerializeField] float gameTime;
+    [SerializeField] float minCooldown;
+    [SerializeField] float maxCooldown;
 
     [Header("Rango de aparición de las palabras")]
     [Space]
@@ -37,7 +38,12 @@ public class LVL3Manager : MonoBehaviour
 
     public float remainingTime { get; private set; }
 
+    public event System.Action<bool> OnGameFinished = delegate { };
+
+
     // ---
+
+    CVCanvasAnswer[] AnswersInScene;
 
 
 
@@ -46,9 +52,11 @@ public class LVL3Manager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        AnswersInScene = FindObjectsOfType<CVCanvasAnswer>();
     }
 
-    void Start()
+    public void StartGame()
     {
         StartCoroutine(Game());
     }
@@ -60,18 +68,18 @@ public class LVL3Manager : MonoBehaviour
 
         yield return InstanciarPalabras(CurrentCV);
         yield return Timer();
-    }
+
+        OnGameFinished(IsDone());
+    }   
+
 
     private IEnumerator InstanciarPalabras(Dictionary<CVType.CVFields, string[]> dictionaryCV)
     {
-        // Espera antes de empezar a instaciar las palabras
-        yield return new WaitForSeconds(1f);
-
         foreach (var words in dictionaryCV)
         {
             foreach (var word in words.Value)
             {
-                yield return new WaitForSeconds(0.5f); //Espera entre cada aparición
+                yield return new WaitForSeconds(Random.Range(minCooldown, maxCooldown)); //Espera entre cada aparición
                 float horizontalAngle = Random.Range(minHorizontalAngle, maxHorizontalAngle);
                 float verticalAngle = Random.Range(minVerticalAngle, maxVerticalAngle);
 
@@ -96,14 +104,17 @@ public class LVL3Manager : MonoBehaviour
     {
         remainingTime = gameTime;
 
-        while (remainingTime > 0f)
+        while (remainingTime > 0f && !IsDone())
         {
             remainingTime -= Time.deltaTime;
 
             yield return null;
         }
+    }
 
-        remainingTime = 0f;
+    bool IsDone()
+    {
+        return AnswersInScene.All(x => x.CheckPalabra());
     }
 
     Dictionary<CVType.CVFields, string[]> CVToDictionary(CVType cv)
