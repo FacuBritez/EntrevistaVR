@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class CVPalabra : MonoBehaviour
 {
@@ -20,13 +21,18 @@ public class CVPalabra : MonoBehaviour
 
     [Space]
     [SerializeField] AudioClip popSound;
+    [SerializeField] AudioClip unpopSound;
+    [SerializeField] AudioClip clickSound;
     [SerializeField] AudioClip writingSound;
     [SerializeField] AudioClip correctingSound;
-    AudioSource audioSource;
+    [SerializeField] AudioSource CorreccionesSounds;
+    [SerializeField] AudioSource CVPalabraSounds;
 
     // ---
 
     public CVType.CVFields fieldType { get; private set; }
+
+    public bool IsPlaced;
 
     // ---
 
@@ -37,9 +43,13 @@ public class CVPalabra : MonoBehaviour
     private void Awake()
     {
         defaultScale = meshTransform.localScale;
-        audioSource = GetComponent<AudioSource>();
-        audioSource.clip = popSound;
-        audioSource.Play();
+        CVPalabraSounds.clip = popSound;
+        CVPalabraSounds.Play();
+    }
+
+    void Start()
+    {
+        LVL3Manager.Instance.OnGameFinished += (w) => PlayReverseAppearAnimation(0.5f); 
     }
 
     // ---
@@ -63,8 +73,8 @@ public class CVPalabra : MonoBehaviour
 
         correctionAnimator.SetBool("Incorrect", true);
 
-        audioSource.clip = writingSound;
-        audioSource.Play();
+        CorreccionesSounds.clip = writingSound;
+        CorreccionesSounds.Play();
     }
 
     public void HideCorrection()
@@ -75,8 +85,8 @@ public class CVPalabra : MonoBehaviour
 
         correctionAnimator.SetBool("Incorrect", false);
 
-        audioSource.clip = correctingSound;
-        audioSource.Play();
+        CorreccionesSounds.clip = correctingSound;
+        CorreccionesSounds.Play();
     }
 
     public void PlayAppearAnimation(float duration)
@@ -86,17 +96,23 @@ public class CVPalabra : MonoBehaviour
 
     public void PlayReverseAppearAnimation(float duration)
     {
+        GetComponent<XRGrabInteractable>().enabled = false;
+        if (IsPlaced) return;
         PlayScaleAnimation(meshTransform.localScale, Vector3.zero, duration, appearAnimCurve);
     }
 
     public void PlayExpandAnimation(Vector2 desiredSize, float duration)
     {
         PlayScaleAnimation(meshTransform.localScale, new(desiredSize.x, desiredSize.y, meshTransform.localScale.z), duration, expandAnimCurve);
+        CVPalabraSounds.clip = clickSound;
+        CVPalabraSounds.Play();
     }
 
     public void PlayReverseExpandAnimation(float duration)
     {
         PlayScaleAnimation(meshTransform.localScale, defaultScale, duration, expandAnimCurve);
+        CVPalabraSounds.clip = unpopSound;
+        CVPalabraSounds.Play();
     }
 
     public void PlayScaleAnimation(Vector3 startScale, Vector3 endScale, float duration, AnimationCurve animationCurve = null)

@@ -19,6 +19,6 @@ public class UIBoxCollider : MonoBehaviour
 
     private void Update()
     {
-        myCollider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 50f);
+        myCollider.size = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y * 0.1f, 50f);
     }
 }
