@@ -6,6 +6,8 @@ public class Sword : MonoBehaviour
 {
     public PlayerNinja myPlayer;
 
+    [SerializeField] AudioClip hitClip;
+
     void Awake()
     {
         myPlayer = (PlayerNinja)FindObjectOfType(typeof(PlayerNinja));
@@ -14,6 +16,7 @@ public class Sword : MonoBehaviour
     {
         if (other.gameObject.GetComponent<ObjectInteractable>())
         {
+            AudioSource.PlayClipAtPoint(hitClip, other.gameObject.transform.position);
             if (!other.gameObject.GetComponent<ObjectInteractable>().isObstacle)
             {
                 Debug.Log("Error, la pifie");

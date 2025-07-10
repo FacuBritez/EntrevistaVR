@@ -5,6 +5,7 @@ using UnityEngine;
 public class ObjectInteractable : MonoBehaviour
 {
     public Vector3 target;
+    public PlayerNinja player;
 
     public float objectSpeed;
     [SerializeField] float rotationSpeed;
@@ -33,6 +34,7 @@ public class ObjectInteractable : MonoBehaviour
         
         if (Vector3.Distance(this.transform.position, target) < 0.05)
         {
+            player.UpdateValues(true, true);
             Destroy(this.gameObject);
         }
     }

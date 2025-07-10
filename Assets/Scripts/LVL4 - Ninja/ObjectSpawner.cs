@@ -13,6 +13,8 @@ public class ObjectSpawner : MonoBehaviour
     Transform RightUpCorner;
 
     [Header("Object References")]
+    [SerializeField]
+    PlayerNinja Player;
 
     [SerializeField]
     GameObject ObjectPrefab;
@@ -21,6 +23,13 @@ public class ObjectSpawner : MonoBehaviour
     [SerializeField]
     float cameraHeightMultiplier;
 
+    [SerializeField]
+    float fogJump;
+
+    [SerializeField]
+    AudioClip FogUpAudio;
+    [SerializeField]
+    AudioClip FogDownAudio;
 
 
 
@@ -36,7 +45,7 @@ public class ObjectSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        RenderSettings.fogDensity = 0.2f;
     }
 
     // Update is called once per frame
@@ -64,6 +73,7 @@ public class ObjectSpawner : MonoBehaviour
     void LoadData(ObjectInteractable spawnedObject)
     {
         spawnedObject.target = new Vector3(CameraPosition.x, CameraPosition.y * cameraHeightMultiplier, CameraPosition.z);
+        spawnedObject.player = Player;
         spawnedObject.objectSpeed = GetLevelSpeed();
     }
 
@@ -97,14 +107,20 @@ public class ObjectSpawner : MonoBehaviour
     {
         if (currentStage != 3)
         {
+            AudioSource.PlayClipAtPoint(FogUpAudio, this.transform.position);
             currentStage++;
+            StartCoroutine(ChangeFog(RenderSettings.fogDensity, RenderSettings.fogDensity - fogJump, 1f));
+            //RenderSettings.fogDensity += 0.05f;
         }
     }
     public void StageDown()
     {
         if (currentStage != 0)
         {
+            AudioSource.PlayClipAtPoint(FogDownAudio, this.transform.position);
             currentStage--;
+            StartCoroutine(ChangeFog(RenderSettings.fogDensity, RenderSettings.fogDensity + fogJump, 1f));
+            //RenderSettings.fogDensity -= 0.05f;
         }
     }
 
@@ -113,6 +129,19 @@ public class ObjectSpawner : MonoBehaviour
         if (Combo >= StageSettingsArray[currentStage].w)
         {
             StageUp();
+        }
+    }
+
+    private IEnumerator ChangeFog(float start, float end, float duration)
+    {
+        
+        float timestep = 0;
+        while (timestep <= duration)
+        {
+            timestep = timestep + Time.deltaTime;
+            float step = Mathf.Clamp01(timestep / duration);
+            RenderSettings.fogDensity = Mathf.Lerp(start, end, step);
+            yield return null;
         }
     }
 }

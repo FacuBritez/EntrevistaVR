@@ -38,6 +38,7 @@ public class Timer : MonoBehaviour
                 Debug.Log("Termino el tiempo");
                 timerText.enabled = false;
                 this.enabled = false;
+                this.gameObject.GetComponent<PlayerNinja>().Win();
 
             }
         }

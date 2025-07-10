@@ -144,7 +144,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 34b2ee92de689fe4e8ea6e35e9f28a0e, type: 2}
+  - {fileID: 2100000, guid: 97ee10c71ed2842478e8fe33b2a69ead, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -560,7 +560,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 34b2ee92de689fe4e8ea6e35e9f28a0e, type: 2}
+  - {fileID: 2100000, guid: 83458c2e61f242f4992d71079b4910b2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -734,7 +734,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 7159403170473650698, guid: ec28f11b4ae96b64e95f7f185d351d6b, type: 3}
+  - {fileID: 2100000, guid: 486b1418ed6a6f64685de953c4863e23, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -983,7 +983,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 34b2ee92de689fe4e8ea6e35e9f28a0e, type: 2}
+  - {fileID: 2100000, guid: 486b1418ed6a6f64685de953c4863e23, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1020,7 +1020,7 @@ GameObject:
   m_Icon: {fileID: 3306451490063965843, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &9165127075129918116
 Transform:
   m_ObjectHideFlags: 0
@@ -1134,7 +1134,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 34b2ee92de689fe4e8ea6e35e9f28a0e, type: 2}
+  - {fileID: 2100000, guid: 83458c2e61f242f4992d71079b4910b2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1217,7 +1217,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 34b2ee92de689fe4e8ea6e35e9f28a0e, type: 2}
+  - {fileID: 2100000, guid: 83458c2e61f242f4992d71079b4910b2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1337,7 +1337,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8352657283398389191
 Transform:
   m_ObjectHideFlags: 0
@@ -1348,8 +1348,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9490873, z: -0.31501335, w: 0}
   m_LocalPosition: {x: 0, y: -0.066, z: 0.08400001}
-  m_LocalScale: {x: 1, y: 1, z: 3}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.4, y: 1.4, z: 4.2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7798500282195532421}
   - {fileID: 3348779257308351336}
@@ -1501,7 +1501,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 34b2ee92de689fe4e8ea6e35e9f28a0e, type: 2}
+  - {fileID: 2100000, guid: 83458c2e61f242f4992d71079b4910b2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1591,6 +1591,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myPlayer: {fileID: 0}
+  hitClip: {fileID: 0}
 --- !u!54 &1319400065749717518
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1836,8 +1837,8 @@ GameObject:
   - component: {fileID: 5579209973681615483}
   - component: {fileID: 2594403501782509342}
   - component: {fileID: 1162911746977193543}
-  - component: {fileID: 2484275364487317070}
   - component: {fileID: 3124794050330647272}
+  - component: {fileID: 7440015018856428620}
   m_Layer: 0
   m_Name: SwordHit
   m_TagString: Untagged
@@ -1931,19 +1932,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2484275364487317070
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8798656411393328490}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba882499ccfc69547bf768e5402e4774, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  myPlayer: {fileID: 0}
 --- !u!54 &3124794050330647272
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1971,6 +1959,20 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 1
+--- !u!114 &7440015018856428620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8798656411393328490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db0db07094d1ae94883ab0693e5a3260, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myPlayer: {fileID: 0}
+  hitClip: {fileID: 8300000, guid: 59535c175279c8b40a76ac50c4b24576, type: 3}
 --- !u!1001 &8482935581339839973
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2044,16 +2046,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d59b577ce5b27e54cbaeb36be5161dec,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 14dd272bea35f8640adc7d9fdc9d6c52, type: 2}
     - target: {fileID: -5602218033676212441, guid: d59b577ce5b27e54cbaeb36be5161dec,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 6f5a7a8d3ff138a489d03b6f0ce0582b, type: 2}
+      objectReference: {fileID: 2100000, guid: 83458c2e61f242f4992d71079b4910b2, type: 2}
     - target: {fileID: 919132149155446097, guid: d59b577ce5b27e54cbaeb36be5161dec,
         type: 3}
       propertyPath: m_Name
       value: espada_laser
       objectReference: {fileID: 0}
+    - target: {fileID: 2457970362981426806, guid: d59b577ce5b27e54cbaeb36be5161dec,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 83458c2e61f242f4992d71079b4910b2, type: 2}
     - target: {fileID: 4013848726950180376, guid: d59b577ce5b27e54cbaeb36be5161dec,
         type: 3}
       propertyPath: m_LocalScale.y

@@ -6,6 +6,7 @@ public class SuctionGun : MonoBehaviour
 {
 
     public PlayerNinja myPlayer;
+    [SerializeField] AudioClip hitClip;
 
     void Awake()
     {
@@ -15,7 +16,7 @@ public class SuctionGun : MonoBehaviour
     {
         if (other.gameObject.GetComponent<ObjectInteractable>())
         {
-
+            AudioSource.PlayClipAtPoint(hitClip, other.gameObject.transform.position);
             if (other.gameObject.GetComponent<ObjectInteractable>().isObstacle)
             {
                 Debug.Log("Error, la pifie");
