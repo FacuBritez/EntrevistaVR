@@ -111,6 +111,7 @@ public class LVL3Manager : MonoBehaviour
         Dictionary<CVType.CVFields, string[]> options = new();
 
         options.Add(CVType.CVFields.SobreMi, cv.SobreMi);
+        options.Add(CVType.CVFields.Contacto, cv.Contacto);
         options.Add(CVType.CVFields.ExpLaboral, cv.ExpLaboral);
         options.Add(CVType.CVFields.Formaciones, cv.Formaciones);
         options.Add(CVType.CVFields.Cursos, cv.Cursos);

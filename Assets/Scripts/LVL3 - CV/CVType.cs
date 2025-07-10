@@ -6,6 +6,7 @@ using UnityEngine;
 public class CVType : ScriptableObject
 {
     [TextArea] public string[] SobreMi;
+    [TextArea] public string[] Contacto;
     [TextArea] public string[] Formaciones;
     [TextArea] public string[] ExpLaboral;
     [TextArea] public string[] Cursos;
@@ -16,6 +17,7 @@ public class CVType : ScriptableObject
     public enum CVFields
     {
         SobreMi,
+        Contacto,
         Formaciones,
         ExpLaboral,
         Cursos
