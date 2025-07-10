@@ -6,11 +6,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
-[RequireComponent(typeof(TMP_Text))]
 [RequireComponent(typeof(BoxCollider))]
 public class CVCanvasAnswer : MonoBehaviour
 {
     [SerializeField] CVType.CVFields field;
+    [SerializeField] Image image;
+    [SerializeField] Color colorNormal = Color.grey;
+    [SerializeField] Color colorHover = new Color(130f / 255f, 130f / 255f, 130f / 255f, 1f);
 
     // ---
 
@@ -24,10 +26,16 @@ public class CVCanvasAnswer : MonoBehaviour
         collider.isTrigger = true;
     }
 
+    Coroutine fadeCoroutine;
 
     void OnTriggerStay(Collider other)
     {
         if (!other.TryGetComponent(out CVPalabra palabra)) return;
+
+        if (fadeCoroutine != null)
+            StopCoroutine(fadeCoroutine);
+        fadeCoroutine = StartCoroutine(Fade(colorHover));
+
         if (palabra.GetComponent<XRGrabInteractable>().isSelected) return;
         if (PalabraActual != null) return;
 
@@ -35,6 +43,32 @@ public class CVCanvasAnswer : MonoBehaviour
     }
 
     // ---
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponent<CVPalabra>())
+        {
+            if (fadeCoroutine != null)
+                StopCoroutine(fadeCoroutine);
+            fadeCoroutine = StartCoroutine(Fade(colorNormal));
+        }
+    }
+
+    IEnumerator Fade(Color targetColor)
+    {
+        float time = 0;
+        float duration = 0.15f;
+        Color startColor = image.color;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            image.color = Color.Lerp(startColor, targetColor, time / duration);
+            yield return null;
+        }
+
+        image.color = targetColor;
+    }
 
     public void PlacePalabra(CVPalabra palabra)
     {
