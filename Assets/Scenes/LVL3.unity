@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.23258401, g: 0.77854645, b: 0.93924665, a: 1}
+  m_IndirectSpecularColor: {r: 0.23542574, g: 0.78035164, b: 0.9403334, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7964,6 +7964,7 @@ GameObject:
   - component: {fileID: 859738067}
   - component: {fileID: 859738066}
   - component: {fileID: 859738065}
+  - component: {fileID: 859738068}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -8018,6 +8019,21 @@ Transform:
   - {fileID: 2090159283}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &859738068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 859738064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86b00ae29182c4248b161041395ca96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actions: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  holdThreshold: 1.5
+  escenaDestino: LVL3
 --- !u!1 &900520504
 GameObject:
   m_ObjectHideFlags: 0
