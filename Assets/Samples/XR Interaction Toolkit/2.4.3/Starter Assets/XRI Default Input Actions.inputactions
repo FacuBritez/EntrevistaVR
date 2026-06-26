@@ -315,6 +315,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Reposition",
+                    "type": "Button",
+                    "id": "0e047ced-1e2b-462b-9822-93e83f69069b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Rotation",
                     "type": "Value",
                     "id": "cb6b7130-2bac-4ef7-abe4-6991ae7d419d",
@@ -614,6 +623,17 @@
                     "action": "Aim Flags",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ddb19cfd-06ea-4ee4-a9e4-7d6a2f5df4d7",
+                    "path": "<XRController>{LeftHand}/menu",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reposition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -705,7 +725,7 @@
                 {
                     "name": "Reposition",
                     "type": "Button",
-                    "id": "afdd1966-9554-40ec-8f80-b7322b854252",
+                    "id": "db1235ed-ab43-4096-841e-5d89486a0f75",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -858,11 +878,22 @@
                 },
                 {
                     "name": "",
-                    "id": "3c806a5b-037b-40ae-82d9-0ebde302ba92",
-                    "path": "<XRController>{LeftHand}/thumbstickClicked",
+                    "id": "6cd640c5-9ab0-40aa-a0c2-d164e42407e1",
+                    "path": "<XRController>{LeftHand}/menu",
                     "interactions": "",
                     "processors": "",
                     "groups": "Generic XR Controller",
+                    "action": "Reposition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1b70dba9-aec8-4a28-8807-a66965d10746",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Reposition",
                     "isComposite": false,
                     "isPartOfComposite": false
