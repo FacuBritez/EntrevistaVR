@@ -521,8 +521,9 @@ GameObject:
   - component: {fileID: 332961039}
   - component: {fileID: 332961038}
   - component: {fileID: 332961037}
+  - component: {fileID: 332961041}
   m_Layer: 0
-  m_Name: "Compa\xF1ero3"
+  m_Name: Compa_Contable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -609,13 +610,31 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 332961036}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.85, y: 0.58, z: 2.7}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.5721442, y: -0.92953676, z: 3.0349097}
   m_LocalScale: {x: 0.66412, y: 0.66412, z: 0.66412}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1942207770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &332961041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332961036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a8179a6c4ce034ab4c0a4569ce9a0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "rolcompa\xF1ero": 2
+  velocidadNormal: 1
+  velocidadEnojado: 0.5
+  tiempoMinDistraccion: 5
+  tiempoMaxDistraccion: 15
+  duracionDistraccion: 3
 --- !u!1 &389478623
 GameObject:
   m_ObjectHideFlags: 0
@@ -1089,8 +1108,9 @@ GameObject:
   - component: {fileID: 759079871}
   - component: {fileID: 759079870}
   - component: {fileID: 759079869}
+  - component: {fileID: 759079873}
   m_Layer: 0
-  m_Name: "Compa\xF1ero1"
+  m_Name: Compa_Programador
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1177,13 +1197,31 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 759079868}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.88, y: 0.58, z: 1.93}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -4.157856, y: -0.92953676, z: 2.2649095}
   m_LocalScale: {x: 0.66412, y: 0.66412, z: 0.66412}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1942207770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &759079873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759079868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a8179a6c4ce034ab4c0a4569ce9a0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "rolcompa\xF1ero": 0
+  velocidadNormal: 1
+  velocidadEnojado: 0.5
+  tiempoMinDistraccion: 5
+  tiempoMaxDistraccion: 15
+  duracionDistraccion: 3
 --- !u!1 &927903384
 GameObject:
   m_ObjectHideFlags: 0
@@ -1196,8 +1234,9 @@ GameObject:
   - component: {fileID: 927903387}
   - component: {fileID: 927903386}
   - component: {fileID: 927903385}
+  - component: {fileID: 927903389}
   m_Layer: 0
-  m_Name: "Compa\xF1ero5"
+  m_Name: Compa_Marketing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1284,13 +1323,31 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 927903384}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.93, y: 0.58, z: -0.38}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -4.2078557, y: -0.92953676, z: -0.045090437}
   m_LocalScale: {x: 0.66412, y: 0.66412, z: 0.66412}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1942207770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &927903389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 927903384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a8179a6c4ce034ab4c0a4569ce9a0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "rolcompa\xF1ero": 4
+  velocidadNormal: 1
+  velocidadEnojado: 0.5
+  tiempoMinDistraccion: 5
+  tiempoMaxDistraccion: 15
+  duracionDistraccion: 3
 --- !u!1 &983822787
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,6 +1469,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae6664c6160c7c84391c9864018d2a52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nombreTarea: "Tarea f\xEDsica"
+  rolRequerido: 0
+  duracionBase: 5
+  velocidadSubida: 0.1
+  alturaMaxima: 0.9
 --- !u!114 &983822793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1708,8 +1770,9 @@ GameObject:
   - component: {fileID: 1075751403}
   - component: {fileID: 1075751402}
   - component: {fileID: 1075751401}
+  - component: {fileID: 1075751405}
   m_Layer: 0
-  m_Name: "Compa\xF1ero4"
+  m_Name: Compa_Musico
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1796,13 +1859,37 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1075751400}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.36, y: 0.58, z: 3.55}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.6378558, y: -0.92953676, z: 3.8849096}
   m_LocalScale: {x: 0.66412, y: 0.66412, z: 0.66412}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1942207770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1075751405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075751400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a8179a6c4ce034ab4c0a4569ce9a0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "rolcompa\xF1ero": 3
+  velocidadNormal: 1
+  velocidadEnojado: 0.5
+  tiempoMinDistraccion: 5
+  tiempoMaxDistraccion: 15
+  duracionDistraccion: 3
+--- !u!120 &1191990082 stripped
+LineRenderer:
+  m_CorrespondingSourceObject: {fileID: 7693184380767619946, guid: ad818c36731146e994540a1896ad8f24,
+    type: 3}
+  m_PrefabInstance: {fileID: 1050169178}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1329170965
 GameObject:
   m_ObjectHideFlags: 0
@@ -2069,6 +2156,7 @@ GameObject:
   - component: {fileID: 1333631211}
   - component: {fileID: 1333631210}
   - component: {fileID: 1333631209}
+  - component: {fileID: 1333631213}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2138,6 +2226,20 @@ Transform:
   - {fileID: 389478624}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1333631213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1333631208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 956c7fb77b0f0db47b4bba094dc37426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lineaLaser: {fileID: 1191990082}
+  rango: 3
 --- !u!1 &1530031016
 GameObject:
   m_ObjectHideFlags: 0
@@ -2576,8 +2678,9 @@ GameObject:
   - component: {fileID: 1875311285}
   - component: {fileID: 1875311284}
   - component: {fileID: 1875311283}
+  - component: {fileID: 1875311287}
   m_Layer: 0
-  m_Name: "Compa\xF1ero2"
+  m_Name: Compa_Artista
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2664,11 +2767,65 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1875311282}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.62, y: 0.58, z: 0.13}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.342144, y: -0.92953676, z: 0.46490955}
   m_LocalScale: {x: 0.66412, y: 0.66412, z: 0.66412}
   m_ConstrainProportionsScale: 0
   m_Children: []
+  m_Father: {fileID: 1942207770}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1875311287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1875311282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a8179a6c4ce034ab4c0a4569ce9a0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "rolcompa\xF1ero": 1
+  velocidadNormal: 1
+  velocidadEnojado: 0.5
+  tiempoMinDistraccion: 5
+  tiempoMaxDistraccion: 15
+  duracionDistraccion: 3
+--- !u!1 &1942207769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1942207770}
+  m_Layer: 0
+  m_Name: Compas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1942207770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1942207769}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.2778558, y: 1.5095367, z: -0.33490956}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 759079872}
+  - {fileID: 1875311286}
+  - {fileID: 332961040}
+  - {fileID: 1075751404}
+  - {fileID: 927903388}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2089130991
@@ -2786,11 +2943,7 @@ SceneRoots:
   - {fileID: 1333631212}
   - {fileID: 1851750838}
   - {fileID: 2089130995}
-  - {fileID: 759079872}
-  - {fileID: 1875311286}
-  - {fileID: 332961040}
-  - {fileID: 1075751404}
-  - {fileID: 927903388}
   - {fileID: 31192012}
   - {fileID: 82465454}
   - {fileID: 983822791}
+  - {fileID: 1942207770}
