@@ -87,7 +87,9 @@ public class JugadorAsignadorTareas : MonoBehaviour
             {
                 if (nuevo != compañeroApuntado)
                 {
+                    if (compañeroApuntado != null) compañeroApuntado.SetApuntado(false);
                     compañeroApuntado = nuevo;
+                    compañeroApuntado.SetApuntado(true);
                     Debug.Log($"🎯 Apuntando a: {nuevo.name} (con tarea)");
                 }
                 return;
@@ -97,11 +99,11 @@ public class JugadorAsignadorTareas : MonoBehaviour
         // Si ya no apunta a ningún compañero
         if (compañeroApuntado != null)
         {
+            compañeroApuntado.SetApuntado(false);
             Debug.Log($"👋 Dejó de apuntar a {compañeroApuntado.name} (con tarea)");
             compañeroApuntado = null;
         }
     }
-
     // ---- Láser ----
     void ActualizarLaser()
     {

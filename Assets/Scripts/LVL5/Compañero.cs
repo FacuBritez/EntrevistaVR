@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 // Posibles estados del compañero
 public enum Estadocompañero
@@ -30,8 +31,14 @@ public enum RolTarea
     Marketing
 }
 
+
 public class Compañero : MonoBehaviour
 {
+    [Header("UI")]
+    [SerializeField] private TMP_Text textoRol;
+    [SerializeField] private TMP_Text textoEstado;
+    [SerializeField] private TMP_Text textoInfo;
+
     [Header("Configuración del compañero")]
     [SerializeField] private RolTarea rolcompañero; // Rol fijo de este compañero
 
@@ -64,7 +71,7 @@ public class Compañero : MonoBehaviour
     //public System.Action<Tarea> OnTareaCompletada;
     //public System.Action OnlistaVacia;
 
-    
+
 
     // Propiedades públicas para consultar el estado o la tarea actual
     public Estadocompañero EstadoActual => estadoActual;
@@ -78,6 +85,8 @@ public class Compañero : MonoBehaviour
         CambiarEstado(Estadocompañero.Esperando);
         // Programamos la primera distracción
         ResetearTemporizadorDistraccion();
+
+        if (textoRol != null) textoRol.text = rolcompañero.ToString();
     }
 
     private void Update()
@@ -97,6 +106,28 @@ public class Compañero : MonoBehaviour
                 // Se dispara la distracción
                 IniciarDistraccion();
             }
+        }
+
+        ActualizarTextoEstado();
+    }
+
+    public void SetApuntado(bool apuntado)
+    {
+        if (textoInfo == null) return;
+        textoInfo.text = apuntado ? "Apuntando" : "";
+    }
+
+    private void ActualizarTextoEstado()
+    {
+        if (textoEstado == null) return;
+
+        if (estadoActual == Estadocompañero.Trabajando || estadoActual == Estadocompañero.Enojado)
+        {
+            textoEstado.text = $"{estadoActual} ({Mathf.Max(0, progresoTarea):F1}s)";
+        }
+        else
+        {
+            textoEstado.text = estadoActual.ToString();
         }
     }
 
