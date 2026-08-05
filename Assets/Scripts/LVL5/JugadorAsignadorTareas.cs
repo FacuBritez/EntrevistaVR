@@ -9,6 +9,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
     private XRGrabInteractable tareaEnMano;
     private Compañero compañeroApuntado;
+    private Transform origenRayo; // se asigna dinámicamente según la mano que agarró
 
     void Start()
     {
@@ -39,9 +40,10 @@ public class JugadorAsignadorTareas : MonoBehaviour
     }
 
     // ---- Eventos llamados desde la hoja ----
-    public void AgarrarTarea(XRGrabInteractable tarea)
+    public void AgarrarTarea(XRGrabInteractable tarea, Transform origen)
     {
         tareaEnMano = tarea;
+        origenRayo = origen;
         compañeroApuntado = null;
         if (lineaLaser != null) lineaLaser.enabled = true;
         Debug.Log("📄 Tarea agarrada");
@@ -62,6 +64,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
         }
 
         tareaEnMano = null;
+        origenRayo = null;
         compañeroApuntado = null;
         if (lineaLaser != null) lineaLaser.enabled = false;
     }
@@ -69,8 +72,12 @@ public class JugadorAsignadorTareas : MonoBehaviour
     // ---- Detección con raycast ----
     void DetectarCompañero()
     {
-        Vector3 origen = transform.position;
-        Vector3 direccion = transform.forward;
+        if (origenRayo == null) return;
+
+        Vector3 origen = origenRayo.position;
+        Vector3 direccion = origenRayo.forward;
+
+        Debug.DrawRay(origen, direccion * rango, Color.yellow);
 
         RaycastHit hit;
         if (Physics.Raycast(origen, direccion, out hit, rango))
@@ -98,13 +105,13 @@ public class JugadorAsignadorTareas : MonoBehaviour
     // ---- Láser ----
     void ActualizarLaser()
     {
-        if (lineaLaser == null) return;
+        if (lineaLaser == null || origenRayo == null) return;
 
-        Vector3 origen = transform.position;
-        Vector3 direccion = transform.forward;
+        Vector3 origen = origenRayo.position;
+        Vector3 direccion = origenRayo.forward;
 
         lineaLaser.SetPosition(0, origen);
-        
+
         if (compañeroApuntado != null)
         {
             // Láser verde que llega hasta el compañero
@@ -139,6 +146,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
         Destroy(tareaEnMano.gameObject);
         tareaEnMano = null;
+        origenRayo = null;
         compañeroApuntado = null;
     }
 }

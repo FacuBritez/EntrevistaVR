@@ -21,11 +21,11 @@ public class HojaTarea : MonoBehaviour
         grab.selectExited.AddListener(OnRelease);
     }
 
-    void OnGrab(SelectEnterEventArgs args)
-    {
-        jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
-        if (jugador != null) jugador.AgarrarTarea(grab);
-    }
+   void OnGrab(SelectEnterEventArgs args)
+{
+    jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
+    if (jugador != null) jugador.AgarrarTarea(grab, args.interactorObject.transform);
+}
 
     void OnRelease(SelectExitEventArgs args)
     {
