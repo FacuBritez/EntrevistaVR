@@ -3,8 +3,8 @@ using UnityEngine;
 public class GeneradorTareas : MonoBehaviour
 {
     [Header("Prefab y Spawn")]
-    [SerializeField] private GameObject prefabHojaTarea; // prefab con el script HojaTarea
-    [SerializeField] private Transform puntoSpawn;        // dónde aparece la hoja
+    [SerializeField] private GameObject prefabHojaTarea;
+    [SerializeField] private Transform puntoSpawn;
 
     [Header("Tiempo entre tareas")]
     [SerializeField] private float tiempoMinSpawn = 3f;
@@ -16,41 +16,39 @@ public class GeneradorTareas : MonoBehaviour
     [SerializeField] private float duracionMax = 10f;
 
     private float temporizador;
+    private GameObject hojaActual; // referencia a la tarea pendiente en escena
 
     void Start()
     {
-        ResetearTemporizador();
     }
 
     void Update()
     {
-        temporizador -= Time.deltaTime;
-        if (temporizador <= 0f)
-        {
-            GenerarTarea();
-            ResetearTemporizador();
-        }
+        // Si hay una hoja activa (aún no fue asignada/destruida), no generamos otra
+        if (hojaActual != null) return;
+
+
+        GenerarTarea();
+
     }
 
     private void GenerarTarea()
     {
         if (prefabHojaTarea == null || puntoSpawn == null) return;
 
-        GameObject nuevaHoja = Instantiate(prefabHojaTarea, puntoSpawn.position, puntoSpawn.rotation);
-        HojaTarea hoja = nuevaHoja.GetComponent<HojaTarea>();
+        hojaActual = Instantiate(prefabHojaTarea, puntoSpawn.position, puntoSpawn.rotation);
+        HojaTarea hoja = hojaActual.GetComponent<HojaTarea>();
 
-        if (hoja != null)
+        if (hoja == null)
         {
-            hoja.nombreTarea = nombresPosibles[Random.Range(0, nombresPosibles.Length)];
-            hoja.rolRequerido = (RolTarea)Random.Range(0, System.Enum.GetValues(typeof(RolTarea)).Length);
-            hoja.duracionBase = Random.Range(duracionMin, duracionMax);
+            Debug.LogWarning("El prefab no tiene componente HojaTarea.");
+            return;
         }
 
-        Debug.Log($"🆕 Nueva tarea generada: {hoja.nombreTarea} ({hoja.rolRequerido})");
-    }
+        hoja.nombreTarea = nombresPosibles[Random.Range(0, nombresPosibles.Length)];
+        hoja.rolRequerido = (RolTarea)Random.Range(0, System.Enum.GetValues(typeof(RolTarea)).Length);
+        hoja.duracionBase = Random.Range(duracionMin, duracionMax);
 
-    private void ResetearTemporizador()
-    {
-        temporizador = Random.Range(tiempoMinSpawn, tiempoMaxSpawn);
+        Debug.Log($"🆕 Nueva tarea generada: {hoja.nombreTarea} ({hoja.rolRequerido})");
     }
 }

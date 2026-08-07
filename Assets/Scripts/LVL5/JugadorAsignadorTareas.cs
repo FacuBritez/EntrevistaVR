@@ -153,6 +153,8 @@ public class JugadorAsignadorTareas : MonoBehaviour
         compañeroApuntado.AsignarTarea(nueva);
         Debug.Log($"✅ Tarea '{nueva.nombreTarea}' asignada a {compañeroApuntado.name}");
 
+        compañeroApuntado.SetApuntado(false);
+
         Destroy(tareaEnMano.gameObject);
         tareaEnMano = null;
         origenRayo = null;
