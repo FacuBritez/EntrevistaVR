@@ -7,6 +7,8 @@ public class JugadorAsignadorTareas : MonoBehaviour
     [SerializeField] private LineRenderer lineaLaser; // Asignar en Inspector
     [SerializeField] private float rango = 3f;       // Distancia del láser
 
+    [SerializeField] private float radioDeteccion = 0.1f;
+
     private XRGrabInteractable tareaEnMano;
     private Compañero compañeroApuntado;
     private Transform origenRayo; // se asigna dinámicamente según la mano que agarró
@@ -80,23 +82,28 @@ public class JugadorAsignadorTareas : MonoBehaviour
         Debug.DrawRay(origen, direccion * rango, Color.yellow);
 
         RaycastHit hit;
-        if (Physics.Raycast(origen, direccion, out hit, rango))
+
+        if (Physics.SphereCast(origen, radioDeteccion, direccion, out hit, rango))
         {
-            Compañero nuevo = hit.collider.GetComponent<Compañero>();
+            Compañero nuevo = hit.collider.GetComponentInParent<Compañero>();
+
             if (nuevo != null)
             {
                 if (nuevo != compañeroApuntado)
                 {
-                    if (compañeroApuntado != null) compañeroApuntado.SetApuntado(false);
+                    if (compañeroApuntado != null)
+                        compañeroApuntado.SetApuntado(false);
+
                     compañeroApuntado = nuevo;
                     compañeroApuntado.SetApuntado(true);
+
                     Debug.Log($"🎯 Apuntando a: {nuevo.name} (con tarea)");
                 }
+
                 return;
             }
         }
 
-        // Si ya no apunta a ningún compañero
         if (compañeroApuntado != null)
         {
             compañeroApuntado.SetApuntado(false);
