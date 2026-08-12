@@ -32,6 +32,7 @@ public enum RolTarea
 }
 
 
+
 public class Compañero : MonoBehaviour
 {
     [Header("UI")]
@@ -227,6 +228,11 @@ public class Compañero : MonoBehaviour
         Debug.Log($"{nombre} completó la tarea '{tareaActual.nombreTarea}'.");
         //OnTareaCompletada?.Invoke(tareaActual);
 
+        if (OleadasManager.Instancia != null)
+        {
+            OleadasManager.Instancia.RegistrarTareaCompletada();
+        }
+
         // Limpiamos la tarea actual
         tareaActual = null;
         progresoTarea = 0f;
@@ -297,5 +303,10 @@ public class Compañero : MonoBehaviour
     private void ResetearTemporizadorDistraccion()
     {
         temporizadorDistraccion = Random.Range(tiempoMinDistraccion, tiempoMaxDistraccion);
+    }
+
+    public bool EsRolCorrecto(RolTarea rol)
+    {
+        return rolcompañero == rol;
     }
 }

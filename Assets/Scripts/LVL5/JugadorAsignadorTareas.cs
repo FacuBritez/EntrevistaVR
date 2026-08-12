@@ -141,7 +141,9 @@ public class JugadorAsignadorTareas : MonoBehaviour
     void AsignarTarea()
     {
         HojaTarea hoja = tareaEnMano.GetComponent<HojaTarea>();
-        if (hoja == null || compañeroApuntado == null) return;
+
+        if (hoja == null || compañeroApuntado == null)
+            return;
 
         Tarea nueva = new Tarea
         {
@@ -150,12 +152,25 @@ public class JugadorAsignadorTareas : MonoBehaviour
             duracionBase = hoja.duracionBase
         };
 
+        bool correcta = compañeroApuntado.EsRolCorrecto(hoja.rolRequerido);
+
         compañeroApuntado.AsignarTarea(nueva);
-        Debug.Log($"✅ Tarea '{nueva.nombreTarea}' asignada a {compañeroApuntado.name}");
+
+        if (OleadasManager.Instancia != null)
+        {
+            OleadasManager.Instancia.RegistrarAsignacion(correcta);
+        }
+
+        Debug.Log(
+            $"📄 Tarea '{nueva.nombreTarea}' asignada a " +
+            $"{compañeroApuntado.name} - " +
+            $"{(correcta ? "CORRECTA" : "INCORRECTA")}"
+        );
 
         compañeroApuntado.SetApuntado(false);
 
         Destroy(tareaEnMano.gameObject);
+
         tareaEnMano = null;
         origenRayo = null;
         compañeroApuntado = null;

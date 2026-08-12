@@ -11,32 +11,64 @@ public class GeneradorTareas : MonoBehaviour
     [SerializeField] private float tiempoMaxSpawn = 8f;
 
     [Header("Configuración de tareas")]
-    [SerializeField] private string[] nombresPosibles = { "Reportar bug", "Diseñar UI", "Hacer factura", "Componer música", "Publicar post" };
+    [SerializeField] private string[] nombresPosibles =
+    {
+        "Reportar bug",
+        "Diseñar UI",
+        "Hacer factura",
+        "Componer música",
+        "Publicar post"
+    };
+
     [SerializeField] private float duracionMin = 4f;
     [SerializeField] private float duracionMax = 10f;
 
     private float temporizador;
-    private GameObject hojaActual; // referencia a la tarea pendiente en escena
+    private GameObject hojaActual;
 
-    void Start()
+    private int tareasRestantesPorGenerar;
+    private bool oleadaActiva;
+
+    public void IniciarOleada(int cantidadTareas)
     {
+        tareasRestantesPorGenerar = cantidadTareas;
+        oleadaActiva = true;
+
+        temporizador = 0f;
+        hojaActual = null;
     }
 
-    void Update()
+    private void Update()
     {
-        // Si hay una hoja activa (aún no fue asignada/destruida), no generamos otra
-        if (hojaActual != null) return;
+        if (!oleadaActiva)
+            return;
 
+        if (tareasRestantesPorGenerar <= 0)
+            return;
 
-        GenerarTarea();
+        if (hojaActual != null)
+            return;
 
+        temporizador -= Time.deltaTime;
+
+        if (temporizador <= 0f)
+        {
+            GenerarTarea();
+            temporizador = Random.Range(tiempoMinSpawn, tiempoMaxSpawn);
+        }
     }
 
     private void GenerarTarea()
     {
-        if (prefabHojaTarea == null || puntoSpawn == null) return;
+        if (prefabHojaTarea == null || puntoSpawn == null)
+            return;
 
-        hojaActual = Instantiate(prefabHojaTarea, puntoSpawn.position, puntoSpawn.rotation);
+        hojaActual = Instantiate(
+            prefabHojaTarea,
+            puntoSpawn.position,
+            puntoSpawn.rotation
+        );
+
         HojaTarea hoja = hojaActual.GetComponent<HojaTarea>();
 
         if (hoja == null)
@@ -45,10 +77,22 @@ public class GeneradorTareas : MonoBehaviour
             return;
         }
 
-        hoja.nombreTarea = nombresPosibles[Random.Range(0, nombresPosibles.Length)];
-        hoja.rolRequerido = (RolTarea)Random.Range(0, System.Enum.GetValues(typeof(RolTarea)).Length);
-        hoja.duracionBase = Random.Range(duracionMin, duracionMax);
+        hoja.nombreTarea =
+            nombresPosibles[Random.Range(0, nombresPosibles.Length)];
 
-        Debug.Log($"🆕 Nueva tarea generada: {hoja.nombreTarea} ({hoja.rolRequerido})");
+        hoja.rolRequerido =
+            (RolTarea)Random.Range(
+                0,
+                System.Enum.GetValues(typeof(RolTarea)).Length
+            );
+
+        hoja.duracionBase =
+            Random.Range(duracionMin, duracionMax);
+
+        tareasRestantesPorGenerar--;
+
+        Debug.Log(
+            $"🆕 Nueva tarea: {hoja.nombreTarea} ({hoja.rolRequerido})"
+        );
     }
 }
