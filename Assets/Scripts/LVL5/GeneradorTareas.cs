@@ -1,17 +1,22 @@
 using UnityEngine;
+using TMPro;
 
 public class GeneradorTareas : MonoBehaviour
 {
     [Header("Prefab y Spawn")]
     [SerializeField] private GameObject prefabHojaTarea;
     [SerializeField] private Transform puntoSpawn;
+    [SerializeField] private TMP_Text textoTareasRestantes;
+
+
 
     [Header("Tiempo entre tareas")]
     [SerializeField] private float tiempoMinSpawn = 3f;
     [SerializeField] private float tiempoMaxSpawn = 8f;
 
     [Header("Configuración de tareas")]
-    [SerializeField] private string[] nombresPosibles =
+    [SerializeField]
+    private string[] nombresPosibles =
     {
         "Reportar bug",
         "Diseñar UI",
@@ -23,7 +28,6 @@ public class GeneradorTareas : MonoBehaviour
     [SerializeField] private float duracionMin = 4f;
     [SerializeField] private float duracionMax = 10f;
 
-    private float temporizador;
     private GameObject hojaActual;
 
     private int tareasRestantesPorGenerar;
@@ -34,7 +38,6 @@ public class GeneradorTareas : MonoBehaviour
         tareasRestantesPorGenerar = cantidadTareas;
         oleadaActiva = true;
 
-        temporizador = 0f;
         hojaActual = null;
     }
 
@@ -49,13 +52,7 @@ public class GeneradorTareas : MonoBehaviour
         if (hojaActual != null)
             return;
 
-        temporizador -= Time.deltaTime;
-
-        if (temporizador <= 0f)
-        {
             GenerarTarea();
-            temporizador = Random.Range(tiempoMinSpawn, tiempoMaxSpawn);
-        }
     }
 
     private void GenerarTarea()
@@ -90,6 +87,10 @@ public class GeneradorTareas : MonoBehaviour
             Random.Range(duracionMin, duracionMax);
 
         tareasRestantesPorGenerar--;
+        if (textoTareasRestantes != null)
+        {
+            textoTareasRestantes.text = $"{tareasRestantesPorGenerar}";
+        }
 
         Debug.Log(
             $"🆕 Nueva tarea: {hoja.nombreTarea} ({hoja.rolRequerido})"

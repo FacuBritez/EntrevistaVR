@@ -16,6 +16,8 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private ConfiguracionOleada oleada3;
 
     [Header("UI")]
+    [SerializeField] private TMP_Text textoOleada;
+
     [SerializeField] private TMP_Text textoTiempo;
 
     [Header("Generador")]
@@ -90,6 +92,11 @@ public class OleadasManager : MonoBehaviour
         if (generadorTareas != null)
         {
             generadorTareas.IniciarOleada(config.cantidadTareas);
+        }
+
+        if (textoOleada != null)
+        {
+            textoOleada.text = $"Oleada {numeroOleada}";
         }
 
         Debug.Log($"🌊 OLEADA {numeroOleada} - {config.cantidadTareas} tareas - {config.tiempoOleada} segundos");
