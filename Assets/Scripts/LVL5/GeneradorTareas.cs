@@ -89,7 +89,7 @@ public class GeneradorTareas : MonoBehaviour
         tareasRestantesPorGenerar--;
         if (textoTareasRestantes != null)
         {
-            textoTareasRestantes.text = $"{tareasRestantesPorGenerar}";
+            textoTareasRestantes.text = $"Tareas Restantes: {tareasRestantesPorGenerar}";
         }
 
         Debug.Log(
