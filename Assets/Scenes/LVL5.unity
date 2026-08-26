@@ -767,6 +767,7 @@ MonoBehaviour:
   tiempoMinDistraccion: 5
   tiempoMaxDistraccion: 15
   duracionDistraccion: 3
+  animator: {fileID: 0}
 --- !u!1 &389478623
 GameObject:
   m_ObjectHideFlags: 0
@@ -1067,6 +1068,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1831602536}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c112b3c66c9105544ab9456d2be5d1c7,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1831602538}
   m_SourcePrefab: {fileID: 100100000, guid: c112b3c66c9105544ab9456d2be5d1c7, type: 3}
 --- !u!1001 &512948648
 PrefabInstance:
@@ -1610,6 +1615,7 @@ MonoBehaviour:
   tiempoMinDistraccion: 5
   tiempoMaxDistraccion: 15
   duracionDistraccion: 3
+  animator: {fileID: 1376874471}
 --- !u!1 &798175751
 GameObject:
   m_ObjectHideFlags: 0
@@ -2496,6 +2502,7 @@ MonoBehaviour:
   tiempoMinDistraccion: 5
   tiempoMaxDistraccion: 15
   duracionDistraccion: 3
+  animator: {fileID: 995228474}
 --- !u!1 &971482998
 GameObject:
   m_ObjectHideFlags: 0
@@ -3165,6 +3172,7 @@ MonoBehaviour:
   tiempoMinDistraccion: 5
   tiempoMaxDistraccion: 15
   duracionDistraccion: 3
+  animator: {fileID: 1842696409}
 --- !u!1 &1250614990
 GameObject:
   m_ObjectHideFlags: 0
@@ -5910,6 +5918,30 @@ MonoBehaviour:
   tiempoMinDistraccion: 5
   tiempoMaxDistraccion: 15
   duracionDistraccion: 3
+  animator: {fileID: 1831602536}
+--- !u!136 &1831602538
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1831602534}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 4.0175505
+  m_Height: 16.150318
+  m_Direction: 1
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!1001 &1842696406
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6218,6 +6250,7 @@ MonoBehaviour:
   tiempoMinDistraccion: 5
   tiempoMaxDistraccion: 15
   duracionDistraccion: 3
+  animator: {fileID: 0}
 --- !u!95 &1875311288
 Animator:
   serializedVersion: 5
