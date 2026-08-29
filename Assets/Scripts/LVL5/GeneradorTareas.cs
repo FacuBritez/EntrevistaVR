@@ -77,6 +77,8 @@ public class GeneradorTareas : MonoBehaviour
         hoja.nombreTarea =
             nombresPosibles[Random.Range(0, nombresPosibles.Length)];
 
+        hoja.ActualizarTexto();
+
         hoja.rolRequerido =
             (RolTarea)Random.Range(
                 0,

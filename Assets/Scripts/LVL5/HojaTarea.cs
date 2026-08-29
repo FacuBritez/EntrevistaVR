@@ -1,8 +1,12 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using TMPro;
 
 public class HojaTarea : MonoBehaviour
 {
+    [Header("UI")]
+    [SerializeField] private TMP_Text textoTarea;
+
     public string nombreTarea = "Tarea física";
     public RolTarea rolRequerido = RolTarea.Programador;
     public float duracionBase = 5f;
@@ -21,11 +25,17 @@ public class HojaTarea : MonoBehaviour
         grab.selectExited.AddListener(OnRelease);
     }
 
-   void OnGrab(SelectEnterEventArgs args)
-{
-    jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
-    if (jugador != null) jugador.AgarrarTarea(grab, args.interactorObject.transform);
-}
+    void OnGrab(SelectEnterEventArgs args)
+    {
+        jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
+        if (jugador != null) jugador.AgarrarTarea(grab, args.interactorObject.transform);
+    }
+
+    public void ActualizarTexto()
+    {
+        if (textoTarea != null)
+            textoTarea.text = nombreTarea;
+    }
 
     void OnRelease(SelectExitEventArgs args)
     {
