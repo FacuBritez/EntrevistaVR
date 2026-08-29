@@ -9,8 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Escenario Variant 2
   m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
-  m_Parent: {fileID: -4330003443044743274, guid: 2a69cd2cfb0281d4b959cb5515f90645,
-    type: 3}
+  m_Parent: {fileID: 2100000, guid: cc4d8294e0a9a9648bc92d1e884cc726, type: 2}
   m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
   - _ALPHAPREMULTIPLY_ON
