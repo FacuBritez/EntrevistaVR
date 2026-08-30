@@ -231,12 +231,17 @@ public class Compañero : MonoBehaviour
     /// Reproduce la animación correspondiente al estado actual en bucle.
     private void ActualizarAnimacion()
     {
-        if (animator == null) return;
+        if (animator == null)
+        {
+            Debug.LogError($"{nombre}: NO tiene Animator asignado.");
+            return;
+        }
 
-        // El nombre del estado debe coincidir exactamente con el enum (Ej: "Esperando", "Trabajando", etc.)
         string nombreEstado = estadoActual.ToString();
+
+        Debug.Log($"{nombre}: intentando reproducir animación '{nombreEstado}'");
+
         animator.Play(nombreEstado, 0, 0f);
-        // Nota: El clip debe tener "Loop Time" activado en el Inspector del Animator.
     }
 
     // MÉTODOS DE DISTRACCIÓN ---------------------------------

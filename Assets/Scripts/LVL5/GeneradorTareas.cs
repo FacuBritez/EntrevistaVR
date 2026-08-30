@@ -8,12 +8,6 @@ public class GeneradorTareas : MonoBehaviour
     [SerializeField] private Transform puntoSpawn;
     [SerializeField] private TMP_Text textoTareasRestantes;
 
-
-
-    [Header("Tiempo entre tareas")]
-    [SerializeField] private float tiempoMinSpawn = 3f;
-    [SerializeField] private float tiempoMaxSpawn = 8f;
-
     [Header("Configuración de tareas")]
     [SerializeField]
     private string[] nombresPosibles =
