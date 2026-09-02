@@ -23,6 +23,12 @@ public class OleadasManager : MonoBehaviour
     [Header("Generador")]
     [SerializeField] private GeneradorTareas generadorTareas;
 
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoOleadaCompletada;
+    [SerializeField] private AudioClip sonidoOleadaFallida;
+    [SerializeField] private AudioClip sonidoJuegoGanado;
+
     private int numeroOleada = 0;
     private float tiempoRestante;
 
@@ -166,6 +172,7 @@ public class OleadasManager : MonoBehaviour
             return;
 
         oleadaActiva = false;
+        audioSource.PlayOneShot(sonidoOleadaCompletada);
 
         Debug.Log(
             $"🌊 OLEADA {numeroOleada} COMPLETADA | " +
@@ -182,6 +189,7 @@ public class OleadasManager : MonoBehaviour
             return;
 
         oleadaActiva = false;
+        audioSource.PlayOneShot(sonidoOleadaFallida);
 
         int noAsignadas =
             ObtenerConfiguracionActual().cantidadTareas - tareasAsignadas;
@@ -198,6 +206,7 @@ public class OleadasManager : MonoBehaviour
 
     private void GanarJuego()
     {
+        audioSource.PlayOneShot(sonidoJuegoGanado);
         Debug.Log("🏆 ¡JUEGO COMPLETADO!");
         ActualizarTextoTiempo();
     }
