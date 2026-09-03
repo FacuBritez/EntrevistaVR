@@ -51,6 +51,13 @@ public class Compañero : MonoBehaviour
     [Header("Animator")]
     [SerializeField] private Animator animator; // Asignar desde Inspector o se buscará automáticamente
 
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoTareaCompletada;
+    [SerializeField] private AudioClip sonidoDistraccion;
+    [SerializeField] private AudioClip sonidoVuelveATrabajar;
+    [SerializeField] private AudioClip sonidoEnojado;
+
     // --- Variables internas ---
     private string nombre => gameObject.name;
     private Estadocompañero estadoActual = Estadocompañero.Esperando;
@@ -175,6 +182,7 @@ public class Compañero : MonoBehaviour
             }
             else
             {
+                audioSource.PlayOneShot(sonidoEnojado);
                 pausadoPorDistraccion = false;
                 if (rutinaDistraccion != null)
                 {
@@ -196,6 +204,7 @@ public class Compañero : MonoBehaviour
     {
         if (tareaActual == null) return;
 
+        audioSource.PlayOneShot(sonidoTareaCompletada);
         Debug.Log($"{nombre} completó la tarea '{tareaActual.nombreTarea}'.");
 
         if (OleadasManager.Instancia != null)
@@ -252,6 +261,7 @@ public class Compañero : MonoBehaviour
 
         CambiarEstado(Estadocompañero.Distraido);
         pausadoPorDistraccion = true;
+        audioSource.PlayOneShot(sonidoDistraccion);
         Debug.Log($"{nombre} se ha distraído por {duracionDistraccion} segundos.");
 
         if (rutinaDistraccion != null) StopCoroutine(rutinaDistraccion);
@@ -269,6 +279,7 @@ public class Compañero : MonoBehaviour
         {
             CambiarEstado(Estadocompañero.Trabajando);
             ResetearTemporizadorDistraccion();
+            audioSource.PlayOneShot(sonidoVuelveATrabajar);
             Debug.Log($"{nombre} ha vuelto a trabajar en '{tareaActual.nombreTarea}'.");
         }
         else

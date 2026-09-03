@@ -9,6 +9,14 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
     [SerializeField] private float radioDeteccion = 0.1f;
 
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoAgarrar;
+    [SerializeField] private AudioClip sonidoApuntando;
+    [SerializeField] private AudioClip sonidoAsignacionCorrecta;
+    [SerializeField] private AudioClip sonidoAsignacionIncorrecta;
+    [SerializeField] private AudioClip sonidoSoltarSinApuntar;
+
     private XRGrabInteractable tareaEnMano;
     private Compañero compañeroApuntado;
     private Transform origenRayo; // se asigna dinámicamente según la mano que agarró
@@ -48,6 +56,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
         origenRayo = origen;
         compañeroApuntado = null;
         if (lineaLaser != null) lineaLaser.enabled = true;
+        audioSource.PlayOneShot(sonidoAgarrar);
         Debug.Log("📄 Tarea agarrada");
     }
 
@@ -60,7 +69,10 @@ public class JugadorAsignadorTareas : MonoBehaviour
         else
         {
             if (tareaEnMano != null && compañeroApuntado == null)
+            {
+                audioSource.PlayOneShot(sonidoSoltarSinApuntar);
                 Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero");
+            }
             else if (tareaEnMano == null)
                 Debug.Log("⚠️ SoltarTarea llamado sin tarea en mano");
         }
@@ -96,6 +108,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
                     compañeroApuntado = nuevo;
                     compañeroApuntado.SetApuntado(true);
+                    audioSource.PlayOneShot(sonidoApuntando);
 
                     Debug.Log($"🎯 Apuntando a: {nuevo.name} (con tarea)");
                 }
@@ -160,6 +173,8 @@ public class JugadorAsignadorTareas : MonoBehaviour
         {
             OleadasManager.Instancia.RegistrarAsignacion(correcta);
         }
+
+        audioSource.PlayOneShot(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);
 
         Debug.Log(
             $"📄 Tarea '{nueva.nombreTarea}' asignada a " +
