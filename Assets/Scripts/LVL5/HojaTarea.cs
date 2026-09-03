@@ -11,9 +11,13 @@ public class HojaTarea : MonoBehaviour
     public RolTarea rolRequerido = RolTarea.Programador;
     public float duracionBase = 5f;
 
-    [SerializeField] private float velocidadSubida = 0.1f;
     [SerializeField] private float alturaMaxima = 0.9f;
 
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sonidoSalida;
+
+    private float velocidadSubida;
     private bool salio = false;
     private XRGrabInteractable grab;
     private JugadorAsignadorTareas jugador;
@@ -23,6 +27,12 @@ public class HojaTarea : MonoBehaviour
         grab = GetComponent<XRGrabInteractable>();
         grab.selectEntered.AddListener(OnGrab);
         grab.selectExited.AddListener(OnRelease);
+
+        if (sonidoSalida != null)
+        {
+            velocidadSubida = alturaMaxima / sonidoSalida.length;
+            audioSource.PlayOneShot(sonidoSalida);
+        }
     }
 
     void OnGrab(SelectEnterEventArgs args)
