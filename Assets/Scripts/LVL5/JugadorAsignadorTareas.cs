@@ -174,6 +174,11 @@ public class JugadorAsignadorTareas : MonoBehaviour
             OleadasManager.Instancia.RegistrarAsignacion(correcta);
         }
 
+        if (hoja.EsTutorial && OleadasManager.Instancia != null)
+        {
+            OleadasManager.Instancia.SoltarTareaTutorial(correcta);
+        }
+
         audioSource.PlayOneShot(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);
 
         Debug.Log(

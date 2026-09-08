@@ -519,6 +519,16 @@ MonoBehaviour:
   sonidoEntregaCompletada: {fileID: 0}
   sonidoEntregaFallida: {fileID: 0}
   sonidoJuegoGanado: {fileID: 0}
+  prefabTareaTutorial: {fileID: 3622869744023965606, guid: b422a17db9e4ce442a38c4cfc1cf74aa,
+    type: 3}
+  puntoSpawnTutorial: {fileID: 1020580578}
+  programador: {fileID: 1376874470}
+  todosLosCompanieros:
+  - {fileID: 995228473}
+  - {fileID: 1376874470}
+  - {fileID: 1842696408}
+  - {fileID: 1831602534}
+  - {fileID: 2021195531}
 --- !u!4 &307859567
 Transform:
   m_ObjectHideFlags: 0

@@ -35,6 +35,12 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private AudioClip sonidoEntregaFallida;
     [SerializeField] private AudioClip sonidoJuegoGanado;
 
+    [Header("Tutorial")]
+    [SerializeField] private GameObject prefabTareaTutorial;   // El prefab de la tarea (mismo que usa GeneradorTareas)
+    [SerializeField] private Transform puntoSpawnTutorial;     // Donde aparece la tarea (mismo que GeneradorTareas)
+    [SerializeField] private GameObject programador;           // El compañero correcto
+    [SerializeField] private GameObject[] todosLosCompanieros; // Todos los compañeros (incluido programador)
+
     private int numeroEntrega = 0;
     private float tiempoRestante;
     private float tiempoTotalEntrega;
@@ -47,6 +53,13 @@ public class OleadasManager : MonoBehaviour
     private bool entregaActiva = false;
     private bool esperandoProximaEntrega = false;
 
+    // Tutorial
+    private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, Completado }
+    private TutorialState tutorialState = TutorialState.EsperandoAgarrar;
+    private bool tutorialActivo = true;
+    private bool jugadorTieneTarea = false;
+    private GameObject tareaTutorialInstancia;  // la instancia actual
+
     public static OleadasManager Instancia { get; private set; }
 
     private void Awake()
@@ -56,41 +69,162 @@ public class OleadasManager : MonoBehaviour
 
     private void Start()
     {
-        IniciarSiguienteEntrega();
+        IniciarTutorial();
     }
 
     private void Update()
     {
+        if (tutorialActivo)
+        {
+            // No hacemos nada aquí, el flujo se maneja con eventos
+            return;
+        }
+
         if (!entregaActiva)
             return;
 
         tiempoRestante -= Time.deltaTime;
-
         if (tiempoRestante < 0f)
             tiempoRestante = 0f;
 
         ActualizarCirculoProgresoTiempo();
 
-        // Si ya se asignaron todas las tareas pero todavía
-        // hay compañeros trabajando, mostramos el mensaje.
         if (tareasAsignadas >= ObtenerConfiguracionActual().cantidadTareas &&
             tareasCompletadas < ObtenerConfiguracionActual().cantidadTareas)
         {
             MostrarMensajeEsperando();
         }
 
-        // Si se acaba el tiempo, se pierde.
         if (tiempoRestante <= 0f)
         {
             FinalizarEntregaPorTiempo();
             return;
         }
 
-        // Si todas las tareas fueron terminadas, se completa.
         if (tareasCompletadas >= ObtenerConfiguracionActual().cantidadTareas)
         {
             CompletarEntrega();
         }
+    }
+
+    // ---------------------------------------------------------
+    // TUTORIAL
+    // ---------------------------------------------------------
+
+    private void IniciarTutorial()
+    {
+        tutorialActivo = true;
+        tutorialState = TutorialState.EsperandoAgarrar;
+
+        // Desactivar el generador de tareas durante el tutorial
+        if (generadorTareas != null)
+            generadorTareas.enabled = false;
+
+        // Desactivar todos los compañeros excepto el programador
+        foreach (var c in todosLosCompanieros)
+        {
+            if (c != programador)
+                c.SetActive(false);
+        }
+        // Asegurar que el programador está activo
+        if (programador != null)
+            programador.SetActive(true);
+
+        // Instanciar la tarea tutorial
+        CrearTareaTutorial();
+
+        MostrarMensajeTutorial("Toma la tarea que sale de la impresora. Usa el botón de agarre.");
+    }
+
+    private void CrearTareaTutorial()
+    {
+        if (prefabTareaTutorial == null || puntoSpawnTutorial == null)
+        {
+            Debug.LogError("Faltan referencias para la tarea tutorial (prefab o punto de spawn).");
+            return;
+        }
+
+        // Destruir la anterior si existe
+        if (tareaTutorialInstancia != null)
+            Destroy(tareaTutorialInstancia);
+
+        tareaTutorialInstancia = Instantiate(prefabTareaTutorial, puntoSpawnTutorial.position, puntoSpawnTutorial.rotation);
+        HojaTarea ht = tareaTutorialInstancia.GetComponent<HojaTarea>();
+        if (ht != null)
+        {
+            ht.nombreTarea = "Corregir error de código";
+            ht.rolRequerido = RolTarea.Programador;
+            ht.duracionBase = 5f;
+            ht.ActualizarTexto();
+            ht.EsTutorial = true; // para que no interfiera con la lógica normal
+        }
+    }
+
+    public void AgarrarTareaTutorial()
+    {
+        if (tutorialActivo && tutorialState == TutorialState.EsperandoAgarrar)
+        {
+            jugadorTieneTarea = true;
+            tutorialState = TutorialState.EsperandoAsignar;
+            MostrarMensajeTutorial("La tarea dice: 'Corregir error de código'. Eso es para el programador (el de camisa azul). Apunta a él y suelta la tarea.");
+        }
+    }
+
+    public void SoltarTareaTutorial(bool acerto)
+    {
+        if (tutorialActivo && tutorialState == TutorialState.EsperandoAsignar)
+        {
+            if (acerto)
+            {
+                tutorialState = TutorialState.Completado;
+                tutorialActivo = false;
+                jugadorTieneTarea = false;
+                MostrarMensajeTutorial("¡Perfecto! Has aprendido. Ahora comienza el trabajo real.");
+                StartCoroutine(FinalizarTutorial());
+            }
+            else
+            {
+                jugadorTieneTarea = false;
+                // Falló: destruir la tarea actual y crear una nueva
+                if (tareaTutorialInstancia != null)
+                    Destroy(tareaTutorialInstancia);
+                CrearTareaTutorial();
+                MostrarMensajeTutorial("Tienes que soltar la tarea apuntando al programador. Vuelve a intentarlo.");
+                tutorialState = TutorialState.EsperandoAgarrar;
+            }
+        }
+    }
+
+    private IEnumerator FinalizarTutorial()
+    {
+        yield return new WaitForSeconds(2f);
+
+        // Reactivar todos los compañeros
+        foreach (var c in todosLosCompanieros)
+        {
+            c.SetActive(true);
+        }
+
+        // Destruir la tarea tutorial
+        if (tareaTutorialInstancia != null)
+            Destroy(tareaTutorialInstancia);
+
+        // Reactivar el generador de tareas
+        if (generadorTareas != null)
+            generadorTareas.enabled = true;
+
+        LimpiarMensaje();
+        IniciarSiguienteEntrega();
+    }
+
+    private void MostrarMensajeTutorial(string mensaje)
+    {
+        if (textoMensaje != null)
+            textoMensaje.text = mensaje;
+        if (textoEntrega != null)
+            textoEntrega.gameObject.SetActive(false);
+        if (circuloProgreso != null)
+            circuloProgreso.gameObject.SetActive(false);
     }
 
     // ---------------------------------------------------------
@@ -119,7 +253,6 @@ public class OleadasManager : MonoBehaviour
         entregaActiva = true;
         esperandoProximaEntrega = false;
 
-        // Reiniciar círculo de progreso (lleno al 100% y color blanco)
         ActualizarCirculoProgresoTiempo();
 
         if (generadorTareas != null)
@@ -130,15 +263,15 @@ public class OleadasManager : MonoBehaviour
         if (textoEntrega != null)
         {
             textoEntrega.text = $"Entrega {numeroEntrega}";
+            textoEntrega.gameObject.SetActive(true);
         }
+
+        if (circuloProgreso != null)
+            circuloProgreso.gameObject.SetActive(true);
 
         LimpiarMensaje();
 
-        Debug.Log(
-            $"ENTREGA {numeroEntrega} - " +
-            $"{config.cantidadTareas} tareas - " +
-            $"{config.tiempoEntrega} segundos"
-        );
+        Debug.Log($"ENTREGA {numeroEntrega} - {config.cantidadTareas} tareas - {config.tiempoEntrega} segundos");
     }
 
     private ConfiguracionEntrega ObtenerConfiguracionActual()
@@ -153,7 +286,7 @@ public class OleadasManager : MonoBehaviour
     }
 
     // ---------------------------------------------------------
-    // CÍRCULO DE PROGRESO (TIEMPO RESTANTE + COLOR)
+    // CÍRCULO DE PROGRESO
     // ---------------------------------------------------------
 
     private void ActualizarCirculoProgresoTiempo()
@@ -170,8 +303,7 @@ public class OleadasManager : MonoBehaviour
 
         float progreso = tiempoRestante / tiempoTotalEntrega;
         circuloProgreso.fillAmount = progreso;
-        float t = 1f - Mathf.Pow(progreso, 0.5f); // raíz cuadrada para efecto de easing
-
+        float t = 1f - Mathf.Pow(progreso, 0.5f);
         circuloProgreso.color = Color.Lerp(Color.white, Color.red, t);
     }
 
@@ -183,21 +315,15 @@ public class OleadasManager : MonoBehaviour
     {
         if (textoMensaje == null)
             return;
-
-        textoMensaje.text =
-            "Todas las tareas fueron asignadas.\n" +
-            "Esperando que finalicen los trabajos...";
+        textoMensaje.text = "Todas las tareas fueron asignadas.\nEsperando que finalicen los trabajos...";
     }
 
     private void MostrarMensaje(string mensaje)
     {
         if (textoMensaje != null)
             textoMensaje.text = mensaje;
-
-        // Ocultar el texto de entrega y el círculo de progreso
         if (textoEntrega != null)
             textoEntrega.gameObject.SetActive(false);
-
         if (circuloProgreso != null)
             circuloProgreso.gameObject.SetActive(false);
     }
@@ -206,48 +332,30 @@ public class OleadasManager : MonoBehaviour
     {
         if (textoMensaje != null)
             textoMensaje.text = "";
-
-        // Mostrar el texto de entrega y el círculo de progreso
         if (textoEntrega != null)
             textoEntrega.gameObject.SetActive(true);
-
         if (circuloProgreso != null)
             circuloProgreso.gameObject.SetActive(true);
     }
 
     // ---------------------------------------------------------
-    // REGISTRO DE ESTADÍSTICAS
+    // REGISTRO
     // ---------------------------------------------------------
 
     public void RegistrarAsignacion(bool correcta)
     {
         tareasAsignadas++;
-
-        if (correcta)
-            tareasCorrectas++;
-        else
-            tareasIncorrectas++;
-
-        Debug.Log(
-            $"Asignadas: {tareasAsignadas} | " +
-            $"Correctas: {tareasCorrectas} | " +
-            $"Incorrectas: {tareasIncorrectas}"
-        );
+        if (correcta) tareasCorrectas++;
+        else tareasIncorrectas++;
+        Debug.Log($"Asignadas: {tareasAsignadas} | Correctas: {tareasCorrectas} | Incorrectas: {tareasIncorrectas}");
     }
 
     public void RegistrarTareaCompletada()
     {
         tareasCompletadas++;
-
-        Debug.Log(
-            $"Tareas completadas: " +
-            $"{tareasCompletadas}/{ObtenerConfiguracionActual().cantidadTareas}"
-        );
-
+        Debug.Log($"Tareas completadas: {tareasCompletadas}/{ObtenerConfiguracionActual().cantidadTareas}");
         if (tareasCompletadas >= ObtenerConfiguracionActual().cantidadTareas)
-        {
             CompletarEntrega();
-        }
     }
 
     // ---------------------------------------------------------
@@ -256,101 +364,60 @@ public class OleadasManager : MonoBehaviour
 
     private void CompletarEntrega()
     {
-        if (!entregaActiva || esperandoProximaEntrega)
-            return;
-
+        if (!entregaActiva || esperandoProximaEntrega) return;
         entregaActiva = false;
         esperandoProximaEntrega = true;
 
         if (audioSource != null && sonidoEntregaCompletada != null)
             audioSource.PlayOneShot(sonidoEntregaCompletada);
 
-        // Al completar, el círculo se llena al 100% (éxito)
         if (circuloProgreso != null)
         {
             circuloProgreso.fillAmount = 1f;
-            circuloProgreso.color = Color.white; // opcional, pero visualmente se ve bien
+            circuloProgreso.color = Color.white;
         }
 
-        Debug.Log(
-            $"ENTREGA {numeroEntrega} COMPLETADA | " +
-            $"Correctas: {tareasCorrectas} | " +
-            $"Incorrectas: {tareasIncorrectas}"
-        );
-
+        Debug.Log($"ENTREGA {numeroEntrega} COMPLETADA | Correctas: {tareasCorrectas} | Incorrectas: {tareasIncorrectas}");
         StartCoroutine(TransicionProximaEntrega());
     }
 
     private IEnumerator TransicionProximaEntrega()
     {
         MostrarMensaje("¡Entrega completada!");
-
-        yield return new WaitForSeconds(
-            duracionMensajeEntregaCompletada
-        );
-
+        yield return new WaitForSeconds(duracionMensajeEntregaCompletada);
         if (numeroEntrega >= 3)
         {
             GanarJuego();
             yield break;
         }
-
-        MostrarMensaje(
-            "Preparando la próxima entrega...\n" +
-            "¡A trabajar!"
-        );
-
-        yield return new WaitForSeconds(
-            duracionMensajeProximaEntrega
-        );
-
+        MostrarMensaje("Preparando la próxima entrega...\n¡A trabajar!");
+        yield return new WaitForSeconds(duracionMensajeProximaEntrega);
         IniciarSiguienteEntrega();
     }
 
     private void FinalizarEntregaPorTiempo()
     {
-        if (!entregaActiva)
-            return;
-
+        if (!entregaActiva) return;
         entregaActiva = false;
-
         if (audioSource != null && sonidoEntregaFallida != null)
             audioSource.PlayOneShot(sonidoEntregaFallida);
-
-        int noAsignadas =
-            ObtenerConfiguracionActual().cantidadTareas -
-            tareasAsignadas;
-
-        Debug.Log(
-            $"ENTREGA {numeroEntrega} FALLIDA | " +
-            $"Correctas: {tareasCorrectas} | " +
-            $"Incorrectas: {tareasIncorrectas} | " +
-            $"No asignadas: {noAsignadas}"
-        );
-
+        int noAsignadas = ObtenerConfiguracionActual().cantidadTareas - tareasAsignadas;
+        Debug.Log($"ENTREGA {numeroEntrega} FALLIDA | Correctas: {tareasCorrectas} | Incorrectas: {tareasIncorrectas} | No asignadas: {noAsignadas}");
         PerderJuego();
     }
-
-    // ---------------------------------------------------------
-    // FIN DEL JUEGO
-    // ---------------------------------------------------------
 
     private void GanarJuego()
     {
         esperandoProximaEntrega = false;
-
         if (audioSource != null && sonidoJuegoGanado != null)
             audioSource.PlayOneShot(sonidoJuegoGanado);
-
         MostrarMensaje("¡Trabajo completado!");
-
         Debug.Log("¡JUEGO COMPLETADO!");
     }
 
     private void PerderJuego()
     {
         MostrarMensaje("No se pudo completar el trabajo a tiempo.");
-
         Debug.Log("¡JUEGO PERDIDO!");
     }
 
@@ -363,12 +430,5 @@ public class OleadasManager : MonoBehaviour
     public int TareasIncorrectas => tareasIncorrectas;
     public int TareasCompletadas => tareasCompletadas;
 
-    public int TareasNoAsignadas
-    {
-        get
-        {
-            return ObtenerConfiguracionActual().cantidadTareas -
-                   tareasAsignadas;
-        }
-    }
+    public int TareasNoAsignadas => ObtenerConfiguracionActual().cantidadTareas - tareasAsignadas;
 }

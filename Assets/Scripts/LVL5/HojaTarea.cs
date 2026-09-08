@@ -10,6 +10,7 @@ public class HojaTarea : MonoBehaviour
     public string nombreTarea = "Tarea física";
     public RolTarea rolRequerido = RolTarea.Programador;
     public float duracionBase = 5f;
+    public bool EsTutorial = false; // para distinguir si es la tarea tutorial
 
     [SerializeField] private float alturaMaxima = 0.9f;
 
@@ -22,8 +23,14 @@ public class HojaTarea : MonoBehaviour
     private XRGrabInteractable grab;
     private JugadorAsignadorTareas jugador;
 
+    private Vector3 posicionInicial;
+    private Quaternion rotacionInicial;
+
     void Start()
     {
+        posicionInicial = transform.position;
+        rotacionInicial = transform.rotation;
+
         grab = GetComponent<XRGrabInteractable>();
         grab.selectEntered.AddListener(OnGrab);
         grab.selectExited.AddListener(OnRelease);
@@ -39,6 +46,10 @@ public class HojaTarea : MonoBehaviour
     {
         jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
         if (jugador != null) jugador.AgarrarTarea(grab, args.interactorObject.transform);
+
+        // Notificar al OleadasManager si es la tarea tutorial
+        if (EsTutorial && OleadasManager.Instancia != null)
+            OleadasManager.Instancia.AgarrarTareaTutorial();
     }
 
     public void ActualizarTexto()
@@ -63,5 +74,16 @@ public class HojaTarea : MonoBehaviour
                 salio = true;
             }
         }
+    }
+
+    // Método para resetear la posición (llamado desde OleadasManager cuando falla)
+    public void ResetearPosicion()
+    {
+        transform.position = posicionInicial;
+        transform.rotation = rotacionInicial;
+        salio = false;
+        // Reiniciar animación de salida (opcional)
+        if (sonidoSalida != null)
+            audioSource.PlayOneShot(sonidoSalida);
     }
 }
