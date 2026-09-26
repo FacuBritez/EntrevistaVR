@@ -133,7 +133,7 @@ public class OleadasManager : MonoBehaviour
         // Instanciar la tarea tutorial
         CrearTareaTutorial();
 
-        MostrarMensajeTutorial("Toma la tarea que sale de la impresora. Usa el botón de agarre.");
+        MostrarMensajeTutorial("Agarra la tarea que sale de la impresora usando el botón de agarre.");
     }
 
     private void CrearTareaTutorial()
@@ -166,33 +166,28 @@ public class OleadasManager : MonoBehaviour
         {
             jugadorTieneTarea = true;
             tutorialState = TutorialState.EsperandoAsignar;
-            MostrarMensajeTutorial("La tarea dice: 'Corregir error de código'. Eso es para el programador (el de camisa azul). Apunta a él y suelta la tarea.");
+            MostrarMensajeTutorial("La tarea es para el programador. Apunta a él y suelta la tarea.");
         }
     }
 
     public void SoltarTareaTutorial(bool acerto)
     {
-        if (tutorialActivo && tutorialState == TutorialState.EsperandoAsignar)
+        if (tutorialActivo && tutorialState == TutorialState.EsperandoAsignar && acerto)
         {
-            if (acerto)
-            {
-                tutorialState = TutorialState.Completado;
-                tutorialActivo = false;
-                jugadorTieneTarea = false;
-                MostrarMensajeTutorial("¡Perfecto! Has aprendido. Ahora comienza el trabajo real.");
-                StartCoroutine(FinalizarTutorial());
-            }
-            else
-            {
-                jugadorTieneTarea = false;
-                // Falló: destruir la tarea actual y crear una nueva
-                if (tareaTutorialInstancia != null)
-                    Destroy(tareaTutorialInstancia);
-                CrearTareaTutorial();
-                MostrarMensajeTutorial("Tienes que soltar la tarea apuntando al programador. Vuelve a intentarlo.");
-                tutorialState = TutorialState.EsperandoAgarrar;
-            }
+            tutorialState = TutorialState.Completado;
+            tutorialActivo = false;
+            jugadorTieneTarea = false;
+            StartCoroutine(SecuenciaTutorial());
         }
+    }
+
+    private IEnumerator SecuenciaTutorial()
+    {
+        MostrarMensajeTutorial("¡Perfecto! Ahora empieza el trabajo real.");
+        yield return new WaitForSeconds(3f);
+        MostrarMensajeTutorial("Recuerda: lee bien la tarea y asígnala a quien corresponda.");
+        yield return new WaitForSeconds(3f);
+        StartCoroutine(FinalizarTutorial());
     }
 
     private IEnumerator FinalizarTutorial()
@@ -316,6 +311,10 @@ public class OleadasManager : MonoBehaviour
         if (textoMensaje == null)
             return;
         textoMensaje.text = "Todas las tareas fueron asignadas.\nEsperando que finalicen los trabajos...";
+        if (circuloProgreso != null)
+            circuloProgreso.gameObject.SetActive(false);
+        if (textoEntrega != null)
+            textoEntrega.gameObject.SetActive(false);
     }
 
     private void MostrarMensaje(string mensaje)
