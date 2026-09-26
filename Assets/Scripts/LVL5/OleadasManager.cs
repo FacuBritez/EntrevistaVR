@@ -41,6 +41,10 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private GameObject programador;           // El compañero correcto
     [SerializeField] private GameObject[] todosLosCompanieros; // Todos los compañeros (incluido programador)
 
+    [Header("Final")]
+    [SerializeField] private GameObject cartelGanaste;
+    [SerializeField] private GameObject cartelPerdiste;
+
     private int numeroEntrega = 0;
     private float tiempoRestante;
     private float tiempoTotalEntrega;
@@ -116,24 +120,33 @@ public class OleadasManager : MonoBehaviour
         tutorialActivo = true;
         tutorialState = TutorialState.EsperandoAgarrar;
 
-        // Desactivar el generador de tareas durante el tutorial
         if (generadorTareas != null)
             generadorTareas.enabled = false;
 
-        // Desactivar todos los compañeros excepto el programador
         foreach (var c in todosLosCompanieros)
         {
             if (c != programador)
                 c.SetActive(false);
         }
-        // Asegurar que el programador está activo
         if (programador != null)
             programador.SetActive(true);
 
-        // Instanciar la tarea tutorial
-        CrearTareaTutorial();
+        StartCoroutine(SecuenciaInicioTutorial());
+    }
 
-        MostrarMensajeTutorial("Agarra la tarea que sale de la impresora usando el botón de agarre.");
+    private IEnumerator SecuenciaInicioTutorial()
+    {
+        MostrarMensajeTutorial("¡Bienvenido a tu primer día de pasantía!");
+        yield return new WaitForSeconds(10f);
+
+        MostrarMensajeTutorial("Asigna las tareas que lleguen a tus compañeros.");
+        yield return new WaitForSeconds(5f);
+
+        MostrarMensajeTutorial("Mira la pizarra de tu izquierda para ver sus roles.");
+        yield return new WaitForSeconds(5f);
+
+        CrearTareaTutorial();
+        MostrarMensajeTutorial("Para agarrar la tarea acercale la mano y manten apretado el botón de agarre.");
     }
 
     private void CrearTareaTutorial()
@@ -410,13 +423,13 @@ public class OleadasManager : MonoBehaviour
         esperandoProximaEntrega = false;
         if (audioSource != null && sonidoJuegoGanado != null)
             audioSource.PlayOneShot(sonidoJuegoGanado);
-        MostrarMensaje("¡Trabajo completado!");
+        cartelGanaste.SetActive(true);
         Debug.Log("¡JUEGO COMPLETADO!");
     }
 
     private void PerderJuego()
     {
-        MostrarMensaje("No se pudo completar el trabajo a tiempo.");
+        cartelPerdiste.SetActive(true);
         Debug.Log("¡JUEGO PERDIDO!");
     }
 
