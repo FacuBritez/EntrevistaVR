@@ -61,7 +61,6 @@ public class OleadasManager : MonoBehaviour
     private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, Completado }
     private TutorialState tutorialState = TutorialState.EsperandoAgarrar;
     private bool tutorialActivo = true;
-    private bool jugadorTieneTarea = false;
     private GameObject tareaTutorialInstancia;  // la instancia actual
 
     public static OleadasManager Instancia { get; private set; }
@@ -177,7 +176,6 @@ public class OleadasManager : MonoBehaviour
     {
         if (tutorialActivo && tutorialState == TutorialState.EsperandoAgarrar)
         {
-            jugadorTieneTarea = true;
             tutorialState = TutorialState.EsperandoAsignar;
             MostrarMensajeTutorial("La tarea es para el programador. Apunta a él y suelta la tarea.");
         }
@@ -189,7 +187,6 @@ public class OleadasManager : MonoBehaviour
         {
             tutorialState = TutorialState.Completado;
             tutorialActivo = false;
-            jugadorTieneTarea = false;
             StartCoroutine(SecuenciaTutorial());
         }
     }
