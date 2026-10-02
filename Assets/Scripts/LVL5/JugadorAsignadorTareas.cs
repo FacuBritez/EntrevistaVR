@@ -56,7 +56,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
         origenRayo = origen;
         compañeroApuntado = null;
         if (lineaLaser != null) lineaLaser.enabled = true;
-        audioSource.PlayOneShot(sonidoAgarrar);
+        ReproducirSonido(sonidoAgarrar);
         Debug.Log("📄 Tarea agarrada");
     }
 
@@ -70,7 +70,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
         {
             if (tareaEnMano != null && compañeroApuntado == null)
             {
-                audioSource.PlayOneShot(sonidoSoltarSinApuntar);
+                ReproducirSonido(sonidoSoltarSinApuntar);
                 Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero");
             }
             else if (tareaEnMano == null)
@@ -108,7 +108,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
                     compañeroApuntado = nuevo;
                     compañeroApuntado.SetApuntado(true);
-                    audioSource.PlayOneShot(sonidoApuntando);
+                    ReproducirSonido(sonidoApuntando);
 
                     Debug.Log($"🎯 Apuntando a: {nuevo.name} (con tarea)");
                 }
@@ -179,7 +179,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
             OleadasManager.Instancia.SoltarTareaTutorial(correcta);
         }
 
-        audioSource.PlayOneShot(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);
+        ReproducirSonido(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);
 
         Debug.Log(
             $"📄 Tarea '{nueva.nombreTarea}' asignada a " +
@@ -194,5 +194,11 @@ public class JugadorAsignadorTareas : MonoBehaviour
         tareaEnMano = null;
         origenRayo = null;
         compañeroApuntado = null;
+    }
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+            audioSource.PlayOneShot(clip);
     }
 }

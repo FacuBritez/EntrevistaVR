@@ -182,7 +182,7 @@ public class Compañero : MonoBehaviour
             }
             else
             {
-                audioSource.PlayOneShot(sonidoEnojado);
+                ReproducirSonido(sonidoEnojado);
                 pausadoPorDistraccion = false;
                 if (rutinaDistraccion != null)
                 {
@@ -204,7 +204,7 @@ public class Compañero : MonoBehaviour
     {
         if (tareaActual == null) return;
 
-        audioSource.PlayOneShot(sonidoTareaCompletada);
+        ReproducirSonido(sonidoTareaCompletada);
         Debug.Log($"{nombre} completó la tarea '{tareaActual.nombreTarea}'.");
 
         if (OleadasManager.Instancia != null)
@@ -261,7 +261,7 @@ public class Compañero : MonoBehaviour
 
         CambiarEstado(Estadocompañero.Distraido);
         pausadoPorDistraccion = true;
-        audioSource.PlayOneShot(sonidoDistraccion);
+        ReproducirSonido(sonidoDistraccion);
         Debug.Log($"{nombre} se ha distraído por {duracionDistraccion} segundos.");
 
         if (rutinaDistraccion != null) StopCoroutine(rutinaDistraccion);
@@ -279,7 +279,7 @@ public class Compañero : MonoBehaviour
         {
             CambiarEstado(Estadocompañero.Trabajando);
             ResetearTemporizadorDistraccion();
-            audioSource.PlayOneShot(sonidoVuelveATrabajar);
+            ReproducirSonido(sonidoVuelveATrabajar);
             Debug.Log($"{nombre} ha vuelto a trabajar en '{tareaActual.nombreTarea}'.");
         }
         else
@@ -291,6 +291,12 @@ public class Compañero : MonoBehaviour
     private void ResetearTemporizadorDistraccion()
     {
         temporizadorDistraccion = Random.Range(tiempoMinDistraccion, tiempoMaxDistraccion);
+    }
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+            audioSource.PlayOneShot(clip);
     }
 
     public bool EsRolCorrecto(RolTarea rol)
