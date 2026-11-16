@@ -63,6 +63,56 @@ public class WorkerDisplay : MonoBehaviour
     [SerializeField] private Color colorEnojado    = Color.red;
     [SerializeField] private Color colorDistraido  = Color.yellow;
 
+        // ═══════════════════════════════════════════════════════════════════════
+    //  VISUALIZACIÓN VR: Billboard + "translateZ" hacia la cámara (CORREGIDO)
+    //  La etiqueta sigue al trabajador y se empuja hacia el jugador para que
+    //  NUNCA quede en el mismo plano que la pared del fondo (adiós traspaso).
+    // ═══════════════════════════════════════════════════════════════════════
+    [Header("Configuración de Visualización VR")]
+    [Tooltip("ON: empuja la etiqueta hacia la cámara para que no se mezcle con el fondo.")]
+    [SerializeField] private bool separarDelFondo = true;
+
+    [Tooltip("Cuántos metros hacia el jugador se desplaza la etiqueta. Aumentalo si la pared sigue peleando.")]
+    [SerializeField] private float separacionFondo = 0.5f;
+
+    private Transform cameraTransform;
+    private Vector3 localOffset; // la posición que el editor ya dejó arriba de la cabeza
+
+    void Start()
+    {
+        cameraTransform = Camera.main ? Camera.main.transform : null;
+
+        // Guardamos la posición LOCAL respecto al trabajador (lo que vos pusiste en el Editor).
+        // Es el equivalente a "leer el layout estático antes de mutarlo en runtime".
+        localOffset = transform.localPosition;
+    }
+
+    void LateUpdate()
+    {
+        if (cameraTransform == null) return;
+
+        // 1) Billboard: la etiqueta siempre mira de frente al jugador (solo rotación).
+        transform.rotation = cameraTransform.rotation;
+
+        // 2) Si pediste separar del fondo, recalculamos la posición cada frame.
+        if (separarDelFondo)
+        {
+            // "natural" = dónde estaría la etiqueta arriba de la cabeza del trabajador.
+            // TransformPoint convierte la posición LOCAL (que respetó el editor) a coordenadas
+            // de MUNDO, teniendo en cuenta la escala/rotación del padre. Por eso NO usamos
+            // parent.position + offset a pelo: eso se rompe si el modelo está escalado.
+            Vector3 natural = transform.parent != null
+                ? transform.parent.TransformPoint(localOffset)
+                : transform.position;
+
+            // Dirección unitaria desde la etiqueta hacia la cámara (el "hacia el usuario").
+            Vector3 haciaCamara = (cameraTransform.position - natural).normalized;
+
+            // translateZ(+separacionFondo): la colocamos SIEMPRE más cerca que la pared.
+            transform.position = natural + haciaCamara * separacionFondo;
+        }
+        // Si separarDelFondo = false → no tocamos position → el Editor manda (como antes).
+    }
     // ─────────────────────────────────────────────────────────────────────────
     //  Inicialización del ícono de trabajador (se llama una vez desde Compañero)
     // ─────────────────────────────────────────────────────────────────────────
