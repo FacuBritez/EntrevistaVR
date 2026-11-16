@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 // Posibles estados del compañero
 public enum Estadocompañero
@@ -32,9 +31,8 @@ public enum RolTarea
 public class Compañero : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private TMP_Text textoRol;
-    [SerializeField] private TMP_Text textoEstado;
-    [SerializeField] private TMP_Text textoInfo;
+    [Tooltip("Componente WorkerDisplay ubicado en el Canvas hijo de este trabajador.")]
+    [SerializeField] private WorkerDisplay workerDisplay;
 
     [Header("Configuración del compañero")]
     [SerializeField] private RolTarea rolcompañero; // Rol fijo de este compañero
@@ -77,14 +75,20 @@ public class Compañero : MonoBehaviour
 
     private void Start()
     {
-        // Buscar Animator en los hijos si no se asignó manualmente
+        // Buscar Animator en el GameObject o en los hijos si no se asignó manualmente
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
+
+        // Buscar AudioSource en el GameObject o en los hijos si no se asignó manualmente
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = GetComponentInChildren<AudioSource>();
 
         CambiarEstado(Estadocompañero.Esperando);
         ResetearTemporizadorDistraccion();
 
-        if (textoRol != null) textoRol.text = rolcompañero.ToString();
+        if (workerDisplay != null) workerDisplay.InicializarRol(rolcompañero);
     }
 
     private void Update()
@@ -108,22 +112,20 @@ public class Compañero : MonoBehaviour
 
     public void SetApuntado(bool apuntado)
     {
-        if (textoInfo == null) return;
-        textoInfo.text = apuntado ? "Apuntando" : "";
+        // Ya no se usa textoInfo — el feedback visual puede manejarse en WorkerDisplay si se desea
     }
 
     private void ActualizarTextoEstado()
     {
-        if (textoEstado == null) return;
+        if (workerDisplay == null) return;
 
+        string texto;
         if (estadoActual == Estadocompañero.Trabajando || estadoActual == Estadocompañero.Enojado)
-        {
-            textoEstado.text = $"{estadoActual} ({Mathf.Max(0, progresoTarea):F1}s)";
-        }
+            texto = $"{estadoActual} ({Mathf.Max(0, progresoTarea):F1}s)";
         else
-        {
-            textoEstado.text = estadoActual.ToString();
-        }
+            texto = estadoActual.ToString();
+
+        workerDisplay.ActualizarEstado(estadoActual, texto);
     }
 
     // MÉTODOS PÚBLICOS ---------------------------------
@@ -182,7 +184,7 @@ public class Compañero : MonoBehaviour
             }
             else
             {
-                audioSource.PlayOneShot(sonidoEnojado);
+                ReproducirSonido(sonidoEnojado);
                 pausadoPorDistraccion = false;
                 if (rutinaDistraccion != null)
                 {
@@ -204,7 +206,7 @@ public class Compañero : MonoBehaviour
     {
         if (tareaActual == null) return;
 
-        audioSource.PlayOneShot(sonidoTareaCompletada);
+        ReproducirSonido(sonidoTareaCompletada);
         Debug.Log($"{nombre} completó la tarea '{tareaActual.nombreTarea}'.");
 
         if (OleadasManager.Instancia != null)
@@ -242,15 +244,29 @@ public class Compañero : MonoBehaviour
     {
         if (animator == null)
         {
-            Debug.LogError($"{nombre}: NO tiene Animator asignado.");
+            Debug.LogWarning($"{nombre}: NO tiene Animator asignado.");
             return;
         }
 
         string nombreEstado = estadoActual.ToString();
 
-        Debug.Log($"{nombre}: intentando reproducir animación '{nombreEstado}'");
-
-        animator.Play(nombreEstado, 0, 0f);
+        // Mapeo seguro: si el controller utiliza "Golpeando" para "Enojado" o "boludeando" para "Distraido"
+        if (animator.HasState(0, Animator.StringToHash(nombreEstado)))
+        {
+            animator.Play(nombreEstado, 0, 0f);
+        }
+        else if (estadoActual == Estadocompañero.Enojado && animator.HasState(0, Animator.StringToHash("Golpeando")))
+        {
+            animator.Play("Golpeando", 0, 0f);
+        }
+        else if (estadoActual == Estadocompañero.Distraido && animator.HasState(0, Animator.StringToHash("boludeando")))
+        {
+            animator.Play("boludeando", 0, 0f);
+        }
+        else
+        {
+            Debug.LogWarning($"{nombre}: El Animator no contiene el estado '{nombreEstado}'.");
+        }
     }
 
     // MÉTODOS DE DISTRACCIÓN ---------------------------------
@@ -261,7 +277,7 @@ public class Compañero : MonoBehaviour
 
         CambiarEstado(Estadocompañero.Distraido);
         pausadoPorDistraccion = true;
-        audioSource.PlayOneShot(sonidoDistraccion);
+        ReproducirSonido(sonidoDistraccion);
         Debug.Log($"{nombre} se ha distraído por {duracionDistraccion} segundos.");
 
         if (rutinaDistraccion != null) StopCoroutine(rutinaDistraccion);
@@ -279,7 +295,7 @@ public class Compañero : MonoBehaviour
         {
             CambiarEstado(Estadocompañero.Trabajando);
             ResetearTemporizadorDistraccion();
-            audioSource.PlayOneShot(sonidoVuelveATrabajar);
+            ReproducirSonido(sonidoVuelveATrabajar);
             Debug.Log($"{nombre} ha vuelto a trabajar en '{tareaActual.nombreTarea}'.");
         }
         else
@@ -296,5 +312,13 @@ public class Compañero : MonoBehaviour
     public bool EsRolCorrecto(RolTarea rol)
     {
         return rolcompañero == rol;
+    }
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
 }

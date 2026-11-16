@@ -28,6 +28,12 @@ public class JugadorAsignadorTareas : MonoBehaviour
             lineaLaser.enabled = false;
             lineaLaser.positionCount = 2;
         }
+
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+
+        if (audioSource != null && !audioSource.enabled)
+            audioSource.enabled = true;
     }
 
     void Update()
@@ -56,7 +62,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
         origenRayo = origen;
         compañeroApuntado = null;
         if (lineaLaser != null) lineaLaser.enabled = true;
-        audioSource.PlayOneShot(sonidoAgarrar);
+        ReproducirSonido(sonidoAgarrar);
         Debug.Log("📄 Tarea agarrada");
     }
 
@@ -70,11 +76,22 @@ public class JugadorAsignadorTareas : MonoBehaviour
         {
             if (tareaEnMano != null && compañeroApuntado == null)
             {
-                audioSource.PlayOneShot(sonidoSoltarSinApuntar);
-                Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero");
+                ReproducirSonido(sonidoSoltarSinApuntar);
+                Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero. Se descarta para evitar bloqueo de la máquina.");
+
+                // Evitar softlock en GeneradorTareas reimprimiendo la tarea
+                GeneradorTareas generador = FindObjectOfType<GeneradorTareas>();
+                if (generador != null)
+                {
+                    generador.ReintentarTarea();
+                }
+
+                Destroy(tareaEnMano.gameObject);
             }
             else if (tareaEnMano == null)
+            {
                 Debug.Log("⚠️ SoltarTarea llamado sin tarea en mano");
+            }
         }
 
         tareaEnMano = null;
@@ -108,7 +125,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
                     compañeroApuntado = nuevo;
                     compañeroApuntado.SetApuntado(true);
-                    audioSource.PlayOneShot(sonidoApuntando);
+                    ReproducirSonido(sonidoApuntando);
 
                     Debug.Log($"🎯 Apuntando a: {nuevo.name} (con tarea)");
                 }
@@ -124,6 +141,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
             compañeroApuntado = null;
         }
     }
+
     // ---- Láser ----
     void ActualizarLaser()
     {
@@ -174,7 +192,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
             OleadasManager.Instancia.RegistrarAsignacion(correcta);
         }
 
-        audioSource.PlayOneShot(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);
+        ReproducirSonido(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);
 
         Debug.Log(
             $"📄 Tarea '{nueva.nombreTarea}' asignada a " +
@@ -189,5 +207,13 @@ public class JugadorAsignadorTareas : MonoBehaviour
         tareaEnMano = null;
         origenRayo = null;
         compañeroApuntado = null;
+    }
+
+    private void ReproducirSonido(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
 }

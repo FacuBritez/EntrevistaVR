@@ -28,7 +28,10 @@ public class HojaTarea : MonoBehaviour
         grab.selectEntered.AddListener(OnGrab);
         grab.selectExited.AddListener(OnRelease);
 
-        if (sonidoSalida != null)
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+
+        if (sonidoSalida != null && audioSource != null)
         {
             velocidadSubida = alturaMaxima / sonidoSalida.length;
             audioSource.PlayOneShot(sonidoSalida);
@@ -37,8 +40,12 @@ public class HojaTarea : MonoBehaviour
 
     void OnGrab(SelectEnterEventArgs args)
     {
+        // En cuanto el jugador la agarra, cortar la subida automática para evitar forcejeos
+        salio = true;
+
         jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
-        if (jugador != null) jugador.AgarrarTarea(grab, args.interactorObject.transform);
+        if (jugador != null)
+            jugador.AgarrarTarea(grab, args.interactorObject.transform);
     }
 
     public void ActualizarTexto()
@@ -49,7 +56,9 @@ public class HojaTarea : MonoBehaviour
 
     void OnRelease(SelectExitEventArgs args)
     {
-        if (jugador != null) jugador.SoltarTarea();
+        if (jugador != null)
+            jugador.SoltarTarea();
+
         jugador = null;
     }
 
@@ -62,6 +71,14 @@ public class HojaTarea : MonoBehaviour
             {
                 salio = true;
             }
+        }
+
+        // Seguridad: si cae fuera de la oficina o bajo el piso
+        if (transform.position.y < -2f)
+        {
+            GeneradorTareas gen = FindObjectOfType<GeneradorTareas>();
+            if (gen != null) gen.ReintentarTarea();
+            Destroy(gameObject);
         }
     }
 }

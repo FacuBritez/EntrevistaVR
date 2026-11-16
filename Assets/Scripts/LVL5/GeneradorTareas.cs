@@ -180,4 +180,15 @@ public class GeneradorTareas : MonoBehaviour
                 $"Tareas Restantes: {tareasRestantesPorGenerar}";
         }
     }
+
+    /// <summary>
+    /// Llamado cuando una tarea se cae o se descarta sin asignar, permitiendo que la máquina vuelva a imprimirla sin perder el cupo.
+    /// </summary>
+    public void ReintentarTarea()
+    {
+        tareasRestantesPorGenerar++;
+        hojaActual = null;
+        ActualizarTextoRestantes();
+        Debug.Log("🔄 Tarea reintegrada a la cola de la entrega.");
+    }
 }
