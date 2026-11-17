@@ -1,8 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using TMPro;
 
 public class OleadasManager : MonoBehaviour
@@ -69,13 +67,17 @@ public class OleadasManager : MonoBehaviour
     private Canvas canvasTutorial;
     private TextMeshProUGUI textoTutorial;
     private GameObject panelTutorial;
-    private Volume volumenBlancoNegro;
     private GameObject flechaRoja;
     private SpriteRenderer flechaRenderer;
     private Transform objetivoResaltado;
     private Vector3 escalaOriginalResaltado;
     private Coroutine rutinaPulso;
     private Coroutine rutinaFlecha;
+
+    // Tutorial: resplandor (glow) del objeto resaltado
+    private GameObject resplandor;
+    private SpriteRenderer resplandorRenderer;
+    private Vector3 centroResplandor;
 
     public static OleadasManager Instancia { get; private set; }
 
@@ -154,10 +156,8 @@ public class OleadasManager : MonoBehaviour
         if (textoEntrega != null) textoEntrega.gameObject.SetActive(false);
         if (circuloProgreso != null) circuloProgreso.gameObject.SetActive(false);
 
-        // Crear el HUD del tutorial y activar el efecto blanco y negro azulado.
+        // Crear el HUD del tutorial (sin efecto de blanco y negro; se usa resplandor).
         CrearCanvasTutorial();
-        CrearVolumenBlancoNegro();
-        ActivarBlancoNegro(true);
 
         StartCoroutine(SecuenciaInicioTutorial());
     }
@@ -317,45 +317,8 @@ public class OleadasManager : MonoBehaviour
         textoTutorial.text = "";
     }
 
-    /// <summary>
-    /// Crea un Volume global con Color Adjustments (desaturación) + Split Toning (tinte azul),
-    /// logrando el efecto "blanco y negro con tonos azulados".
-    /// </summary>
-    private void CrearVolumenBlancoNegro()
-    {
-        if (volumenBlancoNegro != null) return;
-
-        var go = new GameObject("VolumenBlancoNegro");
-        go.transform.SetParent(transform, false);
-        volumenBlancoNegro = go.AddComponent<Volume>();
-        volumenBlancoNegro.isGlobal = true;
-        volumenBlancoNegro.priority = 100f;
-
-        var profile = ScriptableObject.CreateInstance<VolumeProfile>();
-
-        // 1) Desaturar (blanco y negro)
-        var colorAdj = profile.Add<ColorAdjustments>();
-        colorAdj.saturation.Override(-100f);
-        colorAdj.contrast.Override(10f);
-
-        // 2) Tinte azulado (se aplica después de la desaturación)
-        var splitToning = profile.Add<SplitToning>();
-        splitToning.shadows.Override(new Color(0.05f, 0.1f, 0.35f));
-        splitToning.highlights.Override(new Color(0.72f, 0.8f, 0.95f));
-        splitToning.balance.Override(0f);
-
-        volumenBlancoNegro.profile = profile;
-        go.SetActive(false); // arranca apagado
-    }
-
-    private void ActivarBlancoNegro(bool activo)
-    {
-        if (volumenBlancoNegro != null)
-            volumenBlancoNegro.gameObject.SetActive(activo);
-    }
-
     // ---------------------------------------------------------
-    // RESALTADO (pulso de escala)
+    // RESALTADO (pulso de escala leve + resplandor)
     // ---------------------------------------------------------
 
     private void ResaltarObjeto(GameObject obj)
@@ -365,6 +328,7 @@ public class OleadasManager : MonoBehaviour
 
         objetivoResaltado = obj.transform;
         escalaOriginalResaltado = objetivoResaltado.localScale;
+        CrearResplandor(obj);
         rutinaPulso = StartCoroutine(Pulso(objetivoResaltado));
     }
 
@@ -374,8 +338,32 @@ public class OleadasManager : MonoBehaviour
         while (target != null && target == objetivoResaltado)
         {
             t += Time.deltaTime * 4f;
-            float factor = 1f + Mathf.Sin(t) * 0.18f;
+            // 75% más leve que antes (era 0.18 -> ahora 0.045).
+            float factor = 1f + Mathf.Sin(t) * 0.045f;
             target.localScale = escalaOriginalResaltado * factor;
+
+            // Resplandor: sigue al objeto, hace billboard y pulsa el alpha.
+            if (resplandor != null)
+            {
+                resplandor.transform.position = centroResplandor;
+
+                if (Camera.main != null)
+                {
+                    Vector3 dir = resplandor.transform.position - Camera.main.transform.position;
+                    dir.y = 0f;
+                    if (dir.sqrMagnitude > 0.0001f)
+                        resplandor.transform.rotation = Quaternion.LookRotation(dir);
+                }
+
+                if (resplandorRenderer != null)
+                {
+                    float alpha = 0.45f + Mathf.Sin(t) * 0.2f;
+                    Color c = resplandorRenderer.color;
+                    c.a = Mathf.Clamp01(alpha);
+                    resplandorRenderer.color = c;
+                }
+            }
+
             yield return null;
         }
     }
@@ -390,6 +378,65 @@ public class OleadasManager : MonoBehaviour
             StopCoroutine(rutinaPulso);
             rutinaPulso = null;
         }
+        QuitarResplandor();
+    }
+
+    private void CrearResplandor(GameObject obj)
+    {
+        QuitarResplandor();
+        if (obj == null) return;
+
+        var go = new GameObject("Resplandor");
+        resplandorRenderer = go.AddComponent<SpriteRenderer>();
+        resplandorRenderer.sprite = CrearSpriteResplandor();
+        resplandorRenderer.color = new Color(1f, 0.85f, 0.25f, 0.5f); // amarillo suave
+        resplandorRenderer.sortingOrder = -50; // se dibuja detrás
+        resplandor = go;
+
+        // Tamaño proporcional al objeto.
+        float tam = 1f;
+        Bounds b = new Bounds(obj.transform.position, Vector3.zero);
+        var renderers = obj.GetComponentsInChildren<Renderer>();
+        if (renderers != null && renderers.Length > 0)
+        {
+            foreach (var r in renderers)
+                b.Encapsulate(r.bounds);
+            tam = Mathf.Max(b.size.x, b.size.y, b.size.z) * 1.5f;
+        }
+        centroResplandor = b.center;
+
+        resplandor.transform.localScale = Vector3.one * tam;
+        resplandor.transform.position = centroResplandor;
+    }
+
+    private void QuitarResplandor()
+    {
+        if (resplandor != null) { Destroy(resplandor); resplandor = null; }
+        resplandorRenderer = null;
+    }
+
+    /// <summary>
+    /// Genera una textura radial suave (glow) que se desvanece hacia los bordes.
+    /// </summary>
+    private Sprite CrearSpriteResplandor()
+    {
+        int size = 128;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        float center = size / 2f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = (x - center) / center;
+                float dy = (y - center) / center;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                float alpha = Mathf.Clamp01(1f - dist);
+                alpha = alpha * alpha; // falloff suave
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
 
     // ---------------------------------------------------------
@@ -492,10 +539,8 @@ public class OleadasManager : MonoBehaviour
     {
         DejarDeResaltar();
         OcultarFlecha();
-        ActivarBlancoNegro(false); // restaura los colores
 
         if (canvasTutorial != null) { Destroy(canvasTutorial.gameObject); canvasTutorial = null; }
-        if (volumenBlancoNegro != null) { Destroy(volumenBlancoNegro.gameObject); volumenBlancoNegro = null; }
         if (flechaRoja != null) { Destroy(flechaRoja); flechaRoja = null; }
 
         textoTutorial = null;
