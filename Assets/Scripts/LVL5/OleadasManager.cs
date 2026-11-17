@@ -41,6 +41,11 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private GameObject programador;           // El compañero correcto
     [SerializeField] private GameObject[] todosLosCompanieros; // Todos los compañeros (incluido programador)
 
+    [Header("Tutorial HUD (VR)")]
+    [SerializeField] private float distanciaHUD = 1.5f;
+    [SerializeField] private float alturaHUD = 0f;
+    [SerializeField] private Vector2 tamanoHUD = new Vector2(1200f, 180f);
+
     [Header("Final")]
     [SerializeField] private GameObject cartelGanaste;
     [SerializeField] private GameObject cartelPerdiste;
@@ -164,18 +169,18 @@ public class OleadasManager : MonoBehaviour
 
     private IEnumerator SecuenciaInicioTutorial()
     {
-        MostrarDialogo("¡Bienvenido a tu primer día de pasantía!");
+        MostrarDialogo("¡Es tu primer día de pasantía!");
         yield return new WaitForSeconds(6f);
 
-        MostrarDialogo("Asigna las tareas que lleguen a tus compañeros.");
+        MostrarDialogo("Asigna las tareas que lleguen a los roles.");
         yield return new WaitForSeconds(5f);
 
-        MostrarDialogo("Mira la pizarra de tu izquierda para ver sus roles.");
+        MostrarDialogo("Mira la pizarra de tu izquierda para ver sus colores.");
         yield return new WaitForSeconds(5f);
 
         CrearTareaTutorial();
         ResaltarObjeto(tareaTutorialInstancia);
-        MostrarDialogo("Para agarrar la tarea acercale la mano y mantené apretado el botón de agarre.");
+        MostrarDialogo("Para agarrar la tarea acercá la mano y mantené apretado el botón de agarre (lateral).");
     }
 
     private void CrearTareaTutorial()
@@ -278,30 +283,38 @@ public class OleadasManager : MonoBehaviour
     {
         if (canvasTutorial != null) return;
 
-        var goCanvas = new GameObject("CanvasTutorial");
-        goCanvas.transform.SetParent(transform, false);
+        Camera camara = Camera.main;
+        if (camara == null)
+        {
+            Debug.LogError("No hay cámara con tag MainCamera.");
+            return;
+        }
+
+        var goCanvas = new GameObject("CanvasTutorial", typeof(RectTransform));
+        goCanvas.transform.SetParent(camara.transform, false);
+        goCanvas.transform.localPosition = new Vector3(0f, alturaHUD, distanciaHUD);
+        goCanvas.transform.localRotation = Quaternion.identity;
+        goCanvas.transform.localScale = Vector3.one * 0.001f;
+
         canvasTutorial = goCanvas.AddComponent<Canvas>();
-        canvasTutorial.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvasTutorial.sortingOrder = 100;
+        canvasTutorial.renderMode = RenderMode.WorldSpace;
+        canvasTutorial.worldCamera = camara;
 
-        var scaler = goCanvas.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        var canvasRect = goCanvas.GetComponent<RectTransform>();
+        canvasRect.sizeDelta = tamanoHUD;
 
-        // Panel (fondo oscuro semi-transparente)
+        // Panel: ahora ocupa TODO el canvas
         var goPanel = new GameObject("PanelTutorial", typeof(RectTransform), typeof(Image));
         goPanel.transform.SetParent(goCanvas.transform, false);
-        var panelImg = goPanel.GetComponent<Image>();
-        panelImg.color = new Color(0f, 0f, 0f, 0.72f);
+        goPanel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.72f);
         var panelRect = goPanel.GetComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.5f, 0f);
-        panelRect.anchorMax = new Vector2(0.5f, 0f);
-        panelRect.pivot = new Vector2(0.5f, 0f);
-        panelRect.anchoredPosition = new Vector2(0f, 120f);
-        panelRect.sizeDelta = new Vector2(1200f, 180f);
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
         panelTutorial = goPanel;
 
-        // Texto del diálogo
+        // Texto (igual que antes)
         var goTexto = new GameObject("TextoTutorial", typeof(RectTransform), typeof(TextMeshProUGUI));
         goTexto.transform.SetParent(goPanel.transform, false);
         textoTutorial = goTexto.GetComponent<TextMeshProUGUI>();
