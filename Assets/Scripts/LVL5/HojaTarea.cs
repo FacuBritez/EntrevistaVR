@@ -11,6 +11,9 @@ public class HojaTarea : MonoBehaviour
     [Header("Icono de rol (mismo orden que el enum RolTarea)")]
     [SerializeField] private Sprite[] iconosRol;
 
+    [Header("Fuente")]
+    [SerializeField] private TMP_FontAsset fuenteTarea;
+
     public string nombreTarea = "Tarea física";
     public RolTarea rolRequerido = RolTarea.Programador;
     public float duracionBase = 5f;
@@ -51,17 +54,70 @@ public class HojaTarea : MonoBehaviour
     }
 
     /// <summary>
-    /// Crea un pequeño SpriteRenderer en el medio de la hoja para mostrar
-    /// el ícono del rol al que hay que entregarle la tarea.
+    /// Arma el display de la hoja según el diseño del SVG:
+    /// título arriba, línea divisoria gris, y abajo una caja roja con el ícono del rol.
     /// </summary>
     private void CrearIconoRol()
     {
+        var spriteBlanco = CrearSpriteSolido(Color.white);
+
+        // Borde negro (detrás de la hoja, un poco más grande).
+        var goBorde = new GameObject("Borde", typeof(SpriteRenderer));
+        goBorde.transform.SetParent(transform, false);
+        goBorde.transform.localPosition = new Vector3(0f, 0f, -0.6f);
+        goBorde.transform.localScale = new Vector3(1.06f, 1.06f, 1f);
+        var bordeRenderer = goBorde.GetComponent<SpriteRenderer>();
+        bordeRenderer.sprite = spriteBlanco;
+        bordeRenderer.color = Color.black;
+        bordeRenderer.sortingOrder = -1;
+
+        // Línea divisoria (gris).
+        var goDivisor = new GameObject("Divisor", typeof(SpriteRenderer));
+        goDivisor.transform.SetParent(transform, false);
+        goDivisor.transform.localPosition = new Vector3(0f, 0.09f, -0.555f);
+        goDivisor.transform.localScale = new Vector3(0.85f, 0.02f, 1f);
+        var divisorRenderer = goDivisor.GetComponent<SpriteRenderer>();
+        divisorRenderer.sprite = spriteBlanco;
+        divisorRenderer.color = new Color(0.82f, 0.82f, 0.82f, 1f);
+        divisorRenderer.sortingOrder = 1;
+
+        // Caja roja (fondo del ícono).
+        var goCaja = new GameObject("CajaIcono", typeof(SpriteRenderer));
+        goCaja.transform.SetParent(transform, false);
+        goCaja.transform.localPosition = new Vector3(0f, -0.19f, -0.555f);
+        goCaja.transform.localScale = new Vector3(0.6f, 0.41f, 1f);
+        var cajaRenderer = goCaja.GetComponent<SpriteRenderer>();
+        cajaRenderer.sprite = spriteBlanco;
+        cajaRenderer.color = Color.red;
+        cajaRenderer.sortingOrder = 0;
+
+        // Ícono del rol (dentro de la caja roja).
         var go = new GameObject("IconoRol", typeof(SpriteRenderer));
         go.transform.SetParent(transform, false);
-        go.transform.localPosition = new Vector3(0f, 0f, -0.55f);
-        go.transform.localScale = new Vector3(0.09f, 0.09f, 0.09f);
+        go.transform.localPosition = new Vector3(0f, -0.19f, -0.55f);
+        go.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         iconoRenderer = go.GetComponent<SpriteRenderer>();
-        iconoRenderer.sortingOrder = 1;
+        iconoRenderer.sortingOrder = 2;
+
+        // Texto (título) arriba.
+        if (textoTarea != null)
+        {
+            var pos = textoTarea.transform.localPosition;
+            pos.y = 0.3f;
+            textoTarea.transform.localPosition = pos;
+        }
+    }
+
+    /// <summary>
+    /// Genera un sprite sólido de 1x1 píxel del color indicado (para el borde,
+    /// el divisor y la caja).
+    /// </summary>
+    private Sprite CrearSpriteSolido(Color color)
+    {
+        var tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        tex.SetPixel(0, 0, color);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
     }
 
     private void ActualizarIcono()
