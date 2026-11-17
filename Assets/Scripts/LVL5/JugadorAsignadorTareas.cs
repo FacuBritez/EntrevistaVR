@@ -77,16 +77,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
             if (tareaEnMano != null && compañeroApuntado == null)
             {
                 ReproducirSonido(sonidoSoltarSinApuntar);
-                Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero. Se descarta para evitar bloqueo de la máquina.");
-
-                // Evitar softlock en GeneradorTareas reimprimiendo la tarea
-                GeneradorTareas generador = FindObjectOfType<GeneradorTareas>();
-                if (generador != null)
-                {
-                    generador.ReintentarTarea();
-                }
-
-                Destroy(tareaEnMano.gameObject);
+                Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero. La hoja queda flotando para volver a agarrarla.");
             }
             else if (tareaEnMano == null)
             {
@@ -190,6 +181,11 @@ public class JugadorAsignadorTareas : MonoBehaviour
         if (OleadasManager.Instancia != null)
         {
             OleadasManager.Instancia.RegistrarAsignacion(correcta);
+        }
+
+        if (hoja.EsTutorial && OleadasManager.Instancia != null)
+        {
+            OleadasManager.Instancia.SoltarTareaTutorial(correcta);
         }
 
         ReproducirSonido(correcta ? sonidoAsignacionCorrecta : sonidoAsignacionIncorrecta);

@@ -91,8 +91,14 @@ public class WorkerDisplay : MonoBehaviour
     {
         if (cameraTransform == null) return;
 
-        // 1) Billboard: la etiqueta siempre mira de frente al jugador (solo rotación).
-        transform.rotation = cameraTransform.rotation;
+        // 1) Billboard: apuntamos el +Z HACIA la cámara (la cara legible de un Canvas es +Z).
+        //    OJO: NO usar "transform.rotation = cameraTransform.rotation": eso apunta el +Z
+        //    en la MISMA dirección de la cámara (alejándolo del jugador) y deja el texto espejado.
+        Vector3 direccionHaciaCamara = cameraTransform.position - transform.position;
+        direccionHaciaCamara.y = 0f; // billboard vertical: sin inclinación arriba/abajo
+
+        if (direccionHaciaCamara.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(direccionHaciaCamara);
 
         // 2) Si pediste separar del fondo, recalculamos la posición cada frame.
         if (separarDelFondo)

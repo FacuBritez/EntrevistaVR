@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using TMPro;
 
 public class OleadasManager : MonoBehaviour
@@ -35,6 +37,16 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private AudioClip sonidoEntregaFallida;
     [SerializeField] private AudioClip sonidoJuegoGanado;
 
+    [Header("Tutorial")]
+    [SerializeField] private GameObject prefabTareaTutorial;   // El prefab de la tarea (mismo que usa GeneradorTareas)
+    [SerializeField] private Transform puntoSpawnTutorial;     // Donde aparece la tarea (mismo que GeneradorTareas)
+    [SerializeField] private GameObject programador;           // El compañero correcto
+    [SerializeField] private GameObject[] todosLosCompanieros; // Todos los compañeros (incluido programador)
+
+    [Header("Final")]
+    [SerializeField] private GameObject cartelGanaste;
+    [SerializeField] private GameObject cartelPerdiste;
+
     private int numeroEntrega = 0;
     private float tiempoRestante;
     private float tiempoTotalEntrega;
@@ -47,6 +59,24 @@ public class OleadasManager : MonoBehaviour
     private bool entregaActiva = false;
     private bool esperandoProximaEntrega = false;
 
+    // Tutorial
+    private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, Completado }
+    private TutorialState tutorialState = TutorialState.EsperandoAgarrar;
+    private bool tutorialActivo = true;
+    private GameObject tareaTutorialInstancia;  // la instancia actual
+
+    // Tutorial: UI (HUD) y efectos visuales
+    private Canvas canvasTutorial;
+    private TextMeshProUGUI textoTutorial;
+    private GameObject panelTutorial;
+    private Volume volumenBlancoNegro;
+    private GameObject flechaRoja;
+    private SpriteRenderer flechaRenderer;
+    private Transform objetivoResaltado;
+    private Vector3 escalaOriginalResaltado;
+    private Coroutine rutinaPulso;
+    private Coroutine rutinaFlecha;
+
     public static OleadasManager Instancia { get; private set; }
 
     private void Awake()
@@ -56,11 +86,17 @@ public class OleadasManager : MonoBehaviour
 
     private void Start()
     {
-        IniciarSiguienteEntrega();
+        IniciarTutorial();
     }
 
     private void Update()
     {
+        if (tutorialActivo)
+        {
+            // No hacemos nada aquí, el flujo se maneja con eventos
+            return;
+        }
+
         if (!entregaActiva)
             return;
 
@@ -91,6 +127,381 @@ public class OleadasManager : MonoBehaviour
         {
             CompletarEntrega();
         }
+    }
+
+    // ---------------------------------------------------------
+    // TUTORIAL
+    // ---------------------------------------------------------
+
+    private void IniciarTutorial()
+    {
+        tutorialActivo = true;
+        tutorialState = TutorialState.EsperandoAgarrar;
+
+        if (generadorTareas != null)
+            generadorTareas.enabled = false;
+
+        foreach (var c in todosLosCompanieros)
+        {
+            if (c != programador)
+                c.SetActive(false);
+        }
+        if (programador != null)
+            programador.SetActive(true);
+
+        // Ocultar la UI diegética (feedback del escenario) mientras dura el tutorial.
+        if (textoMensaje != null) textoMensaje.gameObject.SetActive(false);
+        if (textoEntrega != null) textoEntrega.gameObject.SetActive(false);
+        if (circuloProgreso != null) circuloProgreso.gameObject.SetActive(false);
+
+        // Crear el HUD del tutorial y activar el efecto blanco y negro azulado.
+        CrearCanvasTutorial();
+        CrearVolumenBlancoNegro();
+        ActivarBlancoNegro(true);
+
+        StartCoroutine(SecuenciaInicioTutorial());
+    }
+
+    private IEnumerator SecuenciaInicioTutorial()
+    {
+        MostrarDialogo("¡Bienvenido a tu primer día de pasantía!");
+        yield return new WaitForSeconds(6f);
+
+        MostrarDialogo("Asigna las tareas que lleguen a tus compañeros.");
+        yield return new WaitForSeconds(5f);
+
+        MostrarDialogo("Mira la pizarra de tu izquierda para ver sus roles.");
+        yield return new WaitForSeconds(5f);
+
+        CrearTareaTutorial();
+        ResaltarObjeto(tareaTutorialInstancia);
+        MostrarDialogo("Para agarrar la tarea acercale la mano y mantené apretado el botón de agarre.");
+    }
+
+    private void CrearTareaTutorial()
+    {
+        if (prefabTareaTutorial == null || puntoSpawnTutorial == null)
+        {
+            Debug.LogError("Faltan referencias para la tarea tutorial (prefab o punto de spawn).");
+            return;
+        }
+
+        // Destruir la anterior si existe
+        if (tareaTutorialInstancia != null)
+            Destroy(tareaTutorialInstancia);
+
+        tareaTutorialInstancia = Instantiate(prefabTareaTutorial, puntoSpawnTutorial.position, puntoSpawnTutorial.rotation);
+        HojaTarea ht = tareaTutorialInstancia.GetComponent<HojaTarea>();
+        if (ht != null)
+        {
+            ht.nombreTarea = "Corregir error de código";
+            ht.rolRequerido = RolTarea.Programador;
+            ht.duracionBase = 5f;
+            ht.ActualizarTexto();
+            ht.EsTutorial = true; // para que no interfiera con la lógica normal
+        }
+    }
+
+    public void AgarrarTareaTutorial()
+    {
+        if (tutorialActivo && tutorialState == TutorialState.EsperandoAgarrar)
+        {
+            tutorialState = TutorialState.EsperandoAsignar;
+            DejarDeResaltar();
+            ResaltarObjeto(programador);
+            MostrarFlecha(programador != null ? programador.transform : null);
+            MostrarDialogo("La tarea es para el programador. Apunta a él y suelta la tarea.");
+        }
+    }
+
+    public void SoltarTareaTutorial(bool acerto)
+    {
+        if (tutorialActivo && tutorialState == TutorialState.EsperandoAsignar && acerto)
+        {
+            tutorialState = TutorialState.Completado;
+            tutorialActivo = false;
+            DejarDeResaltar();
+            OcultarFlecha();
+            StartCoroutine(SecuenciaTutorial());
+        }
+    }
+
+    private IEnumerator SecuenciaTutorial()
+    {
+        MostrarDialogo("¡Perfecto! Ahora empieza el trabajo real.");
+        yield return new WaitForSeconds(3f);
+        MostrarDialogo("Recuerda: lee bien la tarea y asígnala a quien corresponda.");
+        yield return new WaitForSeconds(3f);
+        StartCoroutine(FinalizarTutorial());
+    }
+
+    private IEnumerator FinalizarTutorial()
+    {
+        yield return new WaitForSeconds(2f);
+
+        // Reactivar todos los compañeros
+        foreach (var c in todosLosCompanieros)
+        {
+            c.SetActive(true);
+        }
+
+        // Destruir la tarea tutorial
+        if (tareaTutorialInstancia != null)
+            Destroy(tareaTutorialInstancia);
+
+        // Reactivar el generador de tareas
+        if (generadorTareas != null)
+            generadorTareas.enabled = true;
+
+        // Quitar el HUD, la flecha y restaurar los colores.
+        LimpiarTutorial();
+
+        LimpiarMensaje();
+        IniciarSiguienteEntrega();
+    }
+
+    // ---------------------------------------------------------
+    // UI DEL TUTORIAL (HUD) + EFECTOS VISUALES
+    // ---------------------------------------------------------
+
+    private void MostrarDialogo(string mensaje)
+    {
+        if (textoTutorial != null)
+            textoTutorial.text = mensaje;
+    }
+
+    /// <summary>
+    /// Crea el HUD del tutorial: un Canvas en Screen Space Overlay (interfaz de usuario),
+    /// NO un cartel del escenario. Muestra un panel con el texto del diálogo.
+    /// </summary>
+    private void CrearCanvasTutorial()
+    {
+        if (canvasTutorial != null) return;
+
+        var goCanvas = new GameObject("CanvasTutorial");
+        goCanvas.transform.SetParent(transform, false);
+        canvasTutorial = goCanvas.AddComponent<Canvas>();
+        canvasTutorial.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvasTutorial.sortingOrder = 100;
+
+        var scaler = goCanvas.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        // Panel (fondo oscuro semi-transparente)
+        var goPanel = new GameObject("PanelTutorial", typeof(RectTransform), typeof(Image));
+        goPanel.transform.SetParent(goCanvas.transform, false);
+        var panelImg = goPanel.GetComponent<Image>();
+        panelImg.color = new Color(0f, 0f, 0f, 0.72f);
+        var panelRect = goPanel.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.5f, 0f);
+        panelRect.anchorMax = new Vector2(0.5f, 0f);
+        panelRect.pivot = new Vector2(0.5f, 0f);
+        panelRect.anchoredPosition = new Vector2(0f, 120f);
+        panelRect.sizeDelta = new Vector2(1200f, 180f);
+        panelTutorial = goPanel;
+
+        // Texto del diálogo
+        var goTexto = new GameObject("TextoTutorial", typeof(RectTransform), typeof(TextMeshProUGUI));
+        goTexto.transform.SetParent(goPanel.transform, false);
+        textoTutorial = goTexto.GetComponent<TextMeshProUGUI>();
+        textoTutorial.font = TMP_Settings.defaultFontAsset;
+        textoTutorial.fontSize = 40;
+        textoTutorial.alignment = TextAlignmentOptions.Center;
+        textoTutorial.color = Color.white;
+        var textRect = goTexto.GetComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(40f, 30f);
+        textRect.offsetMax = new Vector2(-40f, -30f);
+        textoTutorial.text = "";
+    }
+
+    /// <summary>
+    /// Crea un Volume global con Color Adjustments (desaturación) + Split Toning (tinte azul),
+    /// logrando el efecto "blanco y negro con tonos azulados".
+    /// </summary>
+    private void CrearVolumenBlancoNegro()
+    {
+        if (volumenBlancoNegro != null) return;
+
+        var go = new GameObject("VolumenBlancoNegro");
+        go.transform.SetParent(transform, false);
+        volumenBlancoNegro = go.AddComponent<Volume>();
+        volumenBlancoNegro.isGlobal = true;
+        volumenBlancoNegro.priority = 100f;
+
+        var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+
+        // 1) Desaturar (blanco y negro)
+        var colorAdj = profile.Add<ColorAdjustments>();
+        colorAdj.saturation.Override(-100f);
+        colorAdj.contrast.Override(10f);
+
+        // 2) Tinte azulado (se aplica después de la desaturación)
+        var splitToning = profile.Add<SplitToning>();
+        splitToning.shadows.Override(new Color(0.05f, 0.1f, 0.35f));
+        splitToning.highlights.Override(new Color(0.72f, 0.8f, 0.95f));
+        splitToning.balance.Override(0f);
+
+        volumenBlancoNegro.profile = profile;
+        go.SetActive(false); // arranca apagado
+    }
+
+    private void ActivarBlancoNegro(bool activo)
+    {
+        if (volumenBlancoNegro != null)
+            volumenBlancoNegro.gameObject.SetActive(activo);
+    }
+
+    // ---------------------------------------------------------
+    // RESALTADO (pulso de escala)
+    // ---------------------------------------------------------
+
+    private void ResaltarObjeto(GameObject obj)
+    {
+        DejarDeResaltar();
+        if (obj == null) return;
+
+        objetivoResaltado = obj.transform;
+        escalaOriginalResaltado = objetivoResaltado.localScale;
+        rutinaPulso = StartCoroutine(Pulso(objetivoResaltado));
+    }
+
+    private IEnumerator Pulso(Transform target)
+    {
+        float t = 0f;
+        while (target != null && target == objetivoResaltado)
+        {
+            t += Time.deltaTime * 4f;
+            float factor = 1f + Mathf.Sin(t) * 0.18f;
+            target.localScale = escalaOriginalResaltado * factor;
+            yield return null;
+        }
+    }
+
+    private void DejarDeResaltar()
+    {
+        if (objetivoResaltado != null)
+            objetivoResaltado.localScale = escalaOriginalResaltado;
+        objetivoResaltado = null;
+        if (rutinaPulso != null)
+        {
+            StopCoroutine(rutinaPulso);
+            rutinaPulso = null;
+        }
+    }
+
+    // ---------------------------------------------------------
+    // FLECHA ROJA (señala al trabajador)
+    // ---------------------------------------------------------
+
+    private void MostrarFlecha(Transform objetivo)
+    {
+        if (objetivo == null) return;
+        if (flechaRoja == null)
+            CrearFlecha();
+
+        flechaRoja.SetActive(true);
+        if (rutinaFlecha != null) StopCoroutine(rutinaFlecha);
+        rutinaFlecha = StartCoroutine(SeguirFlecha(objetivo));
+    }
+
+    private void CrearFlecha()
+    {
+        var go = new GameObject("FlechaRoja");
+        flechaRenderer = go.AddComponent<SpriteRenderer>();
+        flechaRenderer.sprite = CrearSpriteFlecha();
+        flechaRenderer.color = Color.red;
+        flechaRenderer.sortingOrder = 200;
+        go.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+        flechaRoja = go;
+    }
+
+    /// <summary>
+    /// Dibuja en runtime una textura de flecha roja apuntando hacia abajo.
+    /// </summary>
+    private Sprite CrearSpriteFlecha()
+    {
+        int size = 64;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color clear = new Color(0, 0, 0, 0);
+        Color red = Color.red;
+
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+                tex.SetPixel(x, y, clear);
+
+        int cx = size / 2;
+
+        // Asta (rectángulo vertical, mitad superior)
+        for (int y = size / 2; y < size; y++)
+            for (int x = cx - 5; x <= cx + 5; x++)
+                tex.SetPixel(x, y, red);
+
+        // Punta (triángulo hacia abajo, mitad inferior)
+        for (int y = 0; y <= size / 2; y++)
+        {
+            float t = y / (float)(size / 2); // 0 en el ápice, 1 en la base
+            int half = Mathf.RoundToInt(t * (size / 2));
+            for (int x = cx - half; x <= cx + half; x++)
+                tex.SetPixel(x, y, red);
+        }
+
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+    }
+
+    private IEnumerator SeguirFlecha(Transform objetivo)
+    {
+        Transform cam = Camera.main ? Camera.main.transform : null;
+        while (objetivo != null && flechaRoja != null && flechaRoja.activeSelf)
+        {
+            Vector3 pos = objetivo.position + Vector3.up * 2.0f;
+            pos.y += Mathf.Sin(Time.time * 3f) * 0.15f; // flota arriba/abajo
+            flechaRoja.transform.position = pos;
+
+            // Billboard vertical (solo Y) para que la flecha mire de frente al jugador.
+            if (cam != null)
+            {
+                Vector3 dir = pos - cam.position;
+                dir.y = 0f;
+                if (dir.sqrMagnitude > 0.0001f)
+                    flechaRoja.transform.rotation = Quaternion.LookRotation(dir);
+            }
+            yield return null;
+        }
+    }
+
+    private void OcultarFlecha()
+    {
+        if (rutinaFlecha != null)
+        {
+            StopCoroutine(rutinaFlecha);
+            rutinaFlecha = null;
+        }
+        if (flechaRoja != null)
+            flechaRoja.SetActive(false);
+    }
+
+    // ---------------------------------------------------------
+    // LIMPIEZA DEL TUTORIAL
+    // ---------------------------------------------------------
+
+    private void LimpiarTutorial()
+    {
+        DejarDeResaltar();
+        OcultarFlecha();
+        ActivarBlancoNegro(false); // restaura los colores
+
+        if (canvasTutorial != null) { Destroy(canvasTutorial.gameObject); canvasTutorial = null; }
+        if (volumenBlancoNegro != null) { Destroy(volumenBlancoNegro.gameObject); volumenBlancoNegro = null; }
+        if (flechaRoja != null) { Destroy(flechaRoja); flechaRoja = null; }
+
+        textoTutorial = null;
+        panelTutorial = null;
+        flechaRenderer = null;
+        objetivoResaltado = null;
     }
 
     // ---------------------------------------------------------
@@ -342,14 +753,16 @@ public class OleadasManager : MonoBehaviour
         if (audioSource != null && sonidoJuegoGanado != null)
             audioSource.PlayOneShot(sonidoJuegoGanado);
 
-        MostrarMensaje("¡Trabajo completado!");
+        if (cartelGanaste != null)
+            cartelGanaste.SetActive(true);
 
         Debug.Log("¡JUEGO COMPLETADO!");
     }
 
     private void PerderJuego()
     {
-        MostrarMensaje("No se pudo completar el trabajo a tiempo.");
+        if (cartelPerdiste != null)
+            cartelPerdiste.SetActive(true);
 
         Debug.Log("¡JUEGO PERDIDO!");
     }

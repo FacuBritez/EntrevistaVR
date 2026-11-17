@@ -1,9 +1,15 @@
 using UnityEngine;
 
 /// <summary>
-/// Hace que este GameObject mire hacia la cámara principal,
+/// Hace que este GameObject mire de frente a la cámara principal,
 /// rotando SOLO en el eje Y (billboard vertical).
-/// Ideal para displays de trabajadores en VR.
+///
+/// ⚠️ IMPORTANTE (canvas / texto / sprites):
+/// Un Canvas (UI) se lee por su cara +Z. Por eso, para que el texto
+/// se vea bien y NO espejado, hay que apuntar el +Z del objeto HACIA
+/// la cámara (LookRotation(cámara - objeto)).
+/// No confundir con un SpriteRenderer o Quad, que se leen por -Z y
+/// necesitan apuntar el +Z en dirección contraria a la cámara.
 /// </summary>
 public class LookAtCamera : MonoBehaviour
 {
@@ -27,7 +33,8 @@ public class LookAtCamera : MonoBehaviour
             else return;
         }
 
-        // Vector hacia la cámara proyectado en el plano horizontal (solo Y)
+        // Vector desde el objeto HACIA la cámara, proyectado en el plano horizontal.
+        // (Para un Canvas la cara legible es +Z, así que apuntamos el +Z hacia la cámara.)
         Vector3 direccion = camTransform.position - transform.position;
         direccion.y = 0f;
 

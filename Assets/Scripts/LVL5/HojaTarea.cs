@@ -10,6 +10,7 @@ public class HojaTarea : MonoBehaviour
     public string nombreTarea = "Tarea física";
     public RolTarea rolRequerido = RolTarea.Programador;
     public float duracionBase = 5f;
+    public bool EsTutorial = false; // para distinguir si es la tarea tutorial
 
     [SerializeField] private float alturaMaxima = 0.9f;
 
@@ -46,6 +47,10 @@ public class HojaTarea : MonoBehaviour
         jugador = args.interactorObject.transform.GetComponentInParent<JugadorAsignadorTareas>();
         if (jugador != null)
             jugador.AgarrarTarea(grab, args.interactorObject.transform);
+
+        // Notificar al OleadasManager si es la tarea tutorial
+        if (EsTutorial && OleadasManager.Instancia != null)
+            OleadasManager.Instancia.AgarrarTareaTutorial();
     }
 
     public void ActualizarTexto()
