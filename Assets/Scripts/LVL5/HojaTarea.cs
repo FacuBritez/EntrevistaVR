@@ -28,6 +28,7 @@ public class HojaTarea : MonoBehaviour
 
     private Vector3 escalaOriginal;
     private Coroutine rutinaAparicion;
+    private Coroutine rutinaDesintegracion;
     private SpriteRenderer iconoRenderer;
 
     void Awake()
@@ -184,6 +185,57 @@ public class HojaTarea : MonoBehaviour
         if (u < 0.75f)
             return Mathf.Lerp(1.6f, 0.1f, (u - 0.4f) / 0.35f);
         return Mathf.Lerp(0.1f, 1f, (u - 0.75f) / 0.25f);
+    }
+
+    /// <summary>
+    /// En vez de desaparecer de golpe, la hoja se "desintegra" en el lugar:
+    /// se encoge y se desvanece, y recién al final se destruye.
+    /// </summary>
+    public void Desintegrar()
+    {
+        if (grab != null)
+            grab.enabled = false;
+
+        if (rutinaDesintegracion != null) StopCoroutine(rutinaDesintegracion);
+        rutinaDesintegracion = StartCoroutine(AnimacionDesintegracion());
+    }
+
+    private IEnumerator AnimacionDesintegracion()
+    {
+        float duracion = 0.6f;
+        float t = 0f;
+        Vector3 escalaInicial = transform.localScale;
+
+        var sprites = GetComponentsInChildren<SpriteRenderer>();
+        var textos = GetComponentsInChildren<TMP_Text>();
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duracion;
+            float u = Mathf.Clamp01(t);
+
+            // Se encoge.
+            transform.localScale = escalaInicial * (1f - u * 0.85f);
+
+            // Se desvanece.
+            float alpha = 1f - u;
+            foreach (var s in sprites)
+            {
+                Color c = s.color;
+                c.a = alpha;
+                s.color = c;
+            }
+            foreach (var txt in textos)
+            {
+                Color c = txt.color;
+                c.a = alpha;
+                txt.color = c;
+            }
+
+            yield return null;
+        }
+
+        Destroy(gameObject);
     }
 
     void OnGrab(SelectEnterEventArgs args)

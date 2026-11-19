@@ -9,7 +9,7 @@ public class OleadasManager : MonoBehaviour
     public class ConfiguracionEntrega
     {
         public int cantidadTareas = 5;
-        public float tiempoEntrega = 180f;
+        public float tiempoEntrega = 126f;
     }
 
     [Header("Configuración de Entregas")]
@@ -61,6 +61,8 @@ public class OleadasManager : MonoBehaviour
 
     private bool entregaActiva = false;
     private bool esperandoProximaEntrega = false;
+    private bool bloqueoColorTiempo = false; // evita que Update pise el color durante el efecto de error
+    private Coroutine rutinaErrorTiempo;
 
     // Tutorial
     private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, Completado }
@@ -117,7 +119,7 @@ public class OleadasManager : MonoBehaviour
         // Si ya se asignaron todas las tareas pero todavía
         // hay compañeros trabajando, mostramos el mensaje.
         if (tareasAsignadas >= ObtenerConfiguracionActual().cantidadTareas &&
-            tareasCompletadas < ObtenerConfiguracionActual().cantidadTareas)
+            TareasResueltas < ObtenerConfiguracionActual().cantidadTareas)
         {
             MostrarMensajeEsperando();
         }
@@ -129,8 +131,8 @@ public class OleadasManager : MonoBehaviour
             return;
         }
 
-        // Si todas las tareas fueron terminadas, se completa.
-        if (tareasCompletadas >= ObtenerConfiguracionActual().cantidadTareas)
+        // Si todas las tareas fueron resueltas (terminadas o rechazadas), se completa.
+        if (TareasResueltas >= ObtenerConfiguracionActual().cantidadTareas)
         {
             CompletarEntrega();
         }
@@ -299,6 +301,10 @@ public class OleadasManager : MonoBehaviour
         canvasTutorial = goCanvas.AddComponent<Canvas>();
         canvasTutorial.renderMode = RenderMode.WorldSpace;
         canvasTutorial.worldCamera = camara;
+
+        // Mostrar el HUD del tutorial por encima de todo (paredes/murales, UI de compañeros, etc.).
+        canvasTutorial.overrideSorting = true;
+        canvasTutorial.sortingOrder = 200;
 
         var canvasRect = goCanvas.GetComponent<RectTransform>();
         canvasRect.sizeDelta = tamanoHUD;
@@ -621,6 +627,13 @@ public class OleadasManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Tareas ya resueltas: las completadas correctamente más las rechazadas
+    /// (entregadas a un rol equivocado). La entrega se completa cuando todas
+    /// las tareas de la oleada están resueltas, no solo las correctas.
+    /// </summary>
+    private int TareasResueltas => tareasCompletadas + tareasIncorrectas;
+
     // ---------------------------------------------------------
     // CÍRCULO DE PROGRESO (TIEMPO RESTANTE + COLOR)
     // ---------------------------------------------------------
@@ -639,9 +652,49 @@ public class OleadasManager : MonoBehaviour
 
         float progreso = tiempoRestante / tiempoTotalEntrega;
         circuloProgreso.fillAmount = progreso;
+
+        // Durante el efecto de error no pisamos el color (parpadea en rojo).
+        if (bloqueoColorTiempo)
+            return;
+
         float t = 1f - Mathf.Pow(progreso, 0.5f); // raíz cuadrada para efecto de easing
 
         circuloProgreso.color = Color.Lerp(Color.white, Color.red, t);
+    }
+
+    /// <summary>
+    /// Penaliza una entrega incorrecta: descuenta 10% del tiempo total y
+    /// dispara el efecto de error en la pantalla de tiempo.
+    /// </summary>
+    private void AplicarPenalizacionIncorrecta()
+    {
+        tiempoRestante = Mathf.Max(0f, tiempoRestante - tiempoTotalEntrega * 0.10f);
+        ActualizarCirculoProgresoTiempo();
+
+        if (rutinaErrorTiempo != null) StopCoroutine(rutinaErrorTiempo);
+        rutinaErrorTiempo = StartCoroutine(EfectoErrorTiempo());
+
+        Debug.Log($"❌ Entrega incorrecta: -10% de tiempo (-{tiempoTotalEntrega * 0.10f:F0}s).");
+    }
+
+    private IEnumerator EfectoErrorTiempo()
+    {
+        bloqueoColorTiempo = true;
+
+        if (circuloProgreso != null)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                circuloProgreso.color = Color.red;
+                yield return new WaitForSeconds(0.1f);
+                circuloProgreso.color = Color.white;
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
+        bloqueoColorTiempo = false;
+        rutinaErrorTiempo = null;
+        ActualizarCirculoProgresoTiempo();
     }
 
     // ---------------------------------------------------------
@@ -693,15 +746,32 @@ public class OleadasManager : MonoBehaviour
         tareasAsignadas++;
 
         if (correcta)
+        {
             tareasCorrectas++;
+        }
         else
+        {
             tareasIncorrectas++;
+
+            // Penalización por entrega incorrecta (solo durante una entrega activa).
+            if (entregaActiva)
+                AplicarPenalizacionIncorrecta();
+        }
 
         Debug.Log(
             $"Asignadas: {tareasAsignadas} | " +
             $"Correctas: {tareasCorrectas} | " +
             $"Incorrectas: {tareasIncorrectas}"
         );
+
+        // Una tarea rechazada queda resuelta de inmediato: si con eso ya se
+        // resolvieron todas, completamos la entrega (evita que quede pausada).
+        // Si la penalización dejó el tiempo en 0, la entrega se pierde por tiempo.
+        if (!correcta && entregaActiva && tiempoRestante > 0f &&
+            TareasResueltas >= ObtenerConfiguracionActual().cantidadTareas)
+        {
+            CompletarEntrega();
+        }
     }
 
     public void RegistrarTareaCompletada()
@@ -713,7 +783,7 @@ public class OleadasManager : MonoBehaviour
             $"{tareasCompletadas}/{ObtenerConfiguracionActual().cantidadTareas}"
         );
 
-        if (tareasCompletadas >= ObtenerConfiguracionActual().cantidadTareas)
+        if (TareasResueltas >= ObtenerConfiguracionActual().cantidadTareas)
         {
             CompletarEntrega();
         }
@@ -812,7 +882,10 @@ public class OleadasManager : MonoBehaviour
             audioSource.PlayOneShot(sonidoJuegoGanado);
 
         if (cartelGanaste != null)
+        {
+            PonerPorEncimaDeTodo(cartelGanaste);
             cartelGanaste.SetActive(true);
+        }
 
         Debug.Log("¡JUEGO COMPLETADO!");
     }
@@ -820,9 +893,32 @@ public class OleadasManager : MonoBehaviour
     private void PerderJuego()
     {
         if (cartelPerdiste != null)
+        {
+            PonerPorEncimaDeTodo(cartelPerdiste);
             cartelPerdiste.SetActive(true);
+        }
 
         Debug.Log("¡JUEGO PERDIDO!");
+    }
+
+    /// <summary>
+    /// Sube el sortingOrder de todos los renderers/canvases del objeto para que
+    /// se dibuje por encima de las paredes/murales y del resto de la UI.
+    /// </summary>
+    private void PonerPorEncimaDeTodo(GameObject obj)
+    {
+        if (obj == null) return;
+
+        var renderers = obj.GetComponentsInChildren<Renderer>(true);
+        foreach (var r in renderers)
+            r.sortingOrder = 200;
+
+        var canvases = obj.GetComponentsInChildren<Canvas>(true);
+        foreach (var c in canvases)
+        {
+            c.overrideSorting = true;
+            c.sortingOrder = 200;
+        }
     }
 
     // ---------------------------------------------------------

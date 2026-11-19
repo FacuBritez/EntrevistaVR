@@ -15,7 +15,7 @@ using TMPro;
 /// Instrucciones de setup en el Inspector:
 /// 1. Asignar las referencias a imgIconoEstado, imgIconoTrabajador y txtEstado.
 /// 2. Expandir "Iconos de Estado" y asignar un sprite por cada valor del enum Estadocompañero
-///    en el mismo orden: Esperando, Trabajando, Enojado, Distraido.
+///    en el mismo orden: Esperando, Trabajando, Enojado, Distraido, Dormido.
 /// 3. Expandir "Iconos de Trabajador" y asignar un sprite por cada valor del enum RolTarea
 ///    en el mismo orden: Programador, Artista, Contable, Musico, Marketing.
 /// </summary>
@@ -42,6 +42,8 @@ public class WorkerDisplay : MonoBehaviour
     [SerializeField] private Sprite iconoEnojado;
     [Tooltip("Índice 3 = Distraido")]
     [SerializeField] private Sprite iconoDistraido;
+    [Tooltip("Índice 4 = Dormido")]
+    [SerializeField] private Sprite iconoDormido;
 
     // ─── Sprites de trabajador ────────────────────────────────────────────────
     [Header("Iconos de Trabajador  (mismo orden que el enum RolTarea)")]
@@ -62,6 +64,7 @@ public class WorkerDisplay : MonoBehaviour
     [SerializeField] private Color colorTrabajando = Color.green;
     [SerializeField] private Color colorEnojado    = Color.red;
     [SerializeField] private Color colorDistraido  = Color.yellow;
+    [SerializeField] private Color colorDormido    = new Color(0.45f, 0.55f, 0.75f, 1f);
 
         // ═══════════════════════════════════════════════════════════════════════
     //  VISUALIZACIÓN VR: Billboard + "translateZ" hacia la cámara (CORREGIDO)
@@ -81,6 +84,15 @@ public class WorkerDisplay : MonoBehaviour
     void Start()
     {
         cameraTransform = Camera.main ? Camera.main.transform : null;
+
+        // Fuerza que esta UI se dibuje por ENCIMA de las paredes/murales del
+        // escenario (que usan materiales transparentes con el mismo render queue).
+        Canvas canvas = GetComponent<Canvas>();
+        if (canvas != null)
+        {
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 100;
+        }
 
         // Guardamos la posición LOCAL respecto al trabajador (lo que vos pusiste en el Editor).
         // Es el equivalente a "leer el layout estático antes de mutarlo en runtime".
@@ -172,6 +184,7 @@ public class WorkerDisplay : MonoBehaviour
             case Estadocompañero.Trabajando: return iconoTrabajando;
             case Estadocompañero.Enojado:    return iconoEnojado;
             case Estadocompañero.Distraido:  return iconoDistraido;
+            case Estadocompañero.Dormido:    return iconoDormido;
             default:                         return null;
         }
     }
@@ -184,6 +197,7 @@ public class WorkerDisplay : MonoBehaviour
             case Estadocompañero.Trabajando: return colorTrabajando;
             case Estadocompañero.Enojado:    return colorEnojado;
             case Estadocompañero.Distraido:  return colorDistraido;
+            case Estadocompañero.Dormido:    return colorDormido;
             default:                         return Color.white;
         }
     }

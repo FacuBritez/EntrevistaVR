@@ -8,7 +8,8 @@ public enum Estadocompañero
     Esperando,
     Trabajando,
     Enojado,
-    Distraido
+    Distraido,
+    Dormido
 }
 
 [System.Serializable]
@@ -42,8 +43,8 @@ public class Compañero : MonoBehaviour
     [SerializeField] private float velocidadEnojado = 0.5f;
 
     [Header("Distracción")]
-    [SerializeField] private float tiempoMinDistraccion = 5f;
-    [SerializeField] private float tiempoMaxDistraccion = 15f;
+    [SerializeField] private float tiempoMinDistraccion = 10f;
+    [SerializeField] private float tiempoMaxDistraccion = 30f;
     [SerializeField] private float duracionDistraccion = 3f;
 
     [Header("Animator")]
@@ -55,6 +56,36 @@ public class Compañero : MonoBehaviour
     [SerializeField] private AudioClip sonidoDistraccion;
     [SerializeField] private AudioClip sonidoVuelveATrabajar;
     [SerializeField] private AudioClip sonidoEnojado;
+
+    [Header("Cansancio")]
+    [Tooltip("Valor máximo de la barra de cansancio.")]
+    [SerializeField] private float cansancioMaximo = 100f;
+    [Tooltip("Valor inicial de la barra al empezar.")]
+    [SerializeField] private float cansancioInicial = 100f;
+    [Tooltip("Cuánto baja el cansancio cada vez que se le asigna una tarea.")]
+    [SerializeField] private float cansancioPorTarea = 20f;
+    [Tooltip("Segundos que tarda en despertarse una vez dormido.")]
+    [SerializeField] private float duracionDormido = 40f;
+    [Tooltip("Nivel de cansancio (0..cansancioMaximo) con el que despierta (medio lleno).")]
+    [SerializeField] private float cansancioAlDespertar = 50f;
+
+    [Header("Barra de cansancio")]
+    [Tooltip("Componente BarraCansancio del canvas 'barraCansancio'. Si se deja vacío, se busca automáticamente.")]
+    [SerializeField] private BarraCansancio barraCansancio;
+
+    [Header("Selección (pulso al apuntar)")]
+    [Tooltip("Cuánto crece/decrece el compañero al ser apuntado (1% = 0.01).")]
+    [SerializeField] private float amplitudPulso = 0.01f;
+    [Tooltip("Velocidad del pulso de selección.")]
+    [SerializeField] private float velocidadPulso = 4f;
+
+    [Header("Enojo")]
+    [Tooltip("Segundos que dura la reacción de enojo al rechazar una tarea de otra categoría.")]
+    [SerializeField] private float duracionEnojado = 2f;
+
+    [Header("Apuntado del láser")]
+    [Tooltip("Fracción de la altura del personaje que se suma por encima del centro al apuntar (0.4 = 40% más alto).")]
+    [SerializeField] private float alturaExtraApuntado = 0.4f;
 
     // --- Variables internas ---
     private string nombre => gameObject.name;
@@ -68,10 +99,42 @@ public class Compañero : MonoBehaviour
 
     private Coroutine rutinaDistraccion;
 
+    // Cansancio
+    private float cansancio;
+    private float temporizadorDormido;
+
+    // Selección (pulso)
+    private bool apuntado = false;
+    private Vector3 escalaOriginal;
+    private float tiempoPulso = 0f;
+
+    // Enojo
+    private Coroutine rutinaEnojado;
+
     // Propiedades públicas
     public Estadocompañero EstadoActual => estadoActual;
     public Tarea TareaActual => tareaActual;
     public int TareasPendientes => listaTareas.Count;
+
+    /// <summary>
+    /// Punto del cuerpo al que apuntar (el centro, no los pies), desplazado un
+    /// poco más arriba. Usa el centro del collider del personaje; si no hay
+    /// collider, cae a un offset fijo.
+    /// </summary>
+    public Vector3 PuntoApuntado
+    {
+        get
+        {
+            Collider col = GetComponent<Collider>();
+            if (col != null)
+            {
+                // Apunta "alturaExtraApuntado" más arriba del centro del cuerpo.
+                return col.bounds.center + Vector3.up * (col.bounds.size.y * alturaExtraApuntado);
+            }
+
+            return transform.position + Vector3.up * 1.5f;
+        }
+    }
 
     private void Start()
     {
@@ -88,12 +151,35 @@ public class Compañero : MonoBehaviour
         CambiarEstado(Estadocompañero.Esperando);
         ResetearTemporizadorDistraccion();
 
+        cansancio = Mathf.Clamp(cansancioInicial, 0f, cansancioMaximo);
+        escalaOriginal = transform.localScale;
+
+        if (barraCansancio == null)
+            barraCansancio = ObtenerBarraCansancio();
+
+        ActualizarBarra();
+
         if (workerDisplay != null) workerDisplay.InicializarRol(rolcompañero);
     }
 
     private void Update()
     {
-        if (estadoActual == Estadocompañero.Trabajando || estadoActual == Estadocompañero.Enojado)
+        // Pulso de selección: crece/decrece un 1% mientras está apuntado.
+        if (apuntado)
+        {
+            tiempoPulso += Time.deltaTime * velocidadPulso;
+            transform.localScale = escalaOriginal * (1f + amplitudPulso * Mathf.Sin(tiempoPulso));
+        }
+
+        // Mientras duerme, regenera el cansancio y no procesa tareas.
+        if (estadoActual == Estadocompañero.Dormido)
+        {
+            ProcesarDormido();
+            ActualizarTextoEstado();
+            return;
+        }
+
+        if (estadoActual == Estadocompañero.Trabajando)
         {
             ProcesarTarea();
         }
@@ -112,7 +198,14 @@ public class Compañero : MonoBehaviour
 
     public void SetApuntado(bool apuntado)
     {
-        // Ya no se usa textoInfo — el feedback visual puede manejarse en WorkerDisplay si se desea
+        this.apuntado = apuntado;
+
+        // Al dejar de apuntar, restauramos la escala original y reiniciamos el pulso.
+        if (!apuntado)
+        {
+            tiempoPulso = 0f;
+            transform.localScale = escalaOriginal;
+        }
     }
 
     private void ActualizarTextoEstado()
@@ -120,8 +213,10 @@ public class Compañero : MonoBehaviour
         if (workerDisplay == null) return;
 
         string texto;
-        if (estadoActual == Estadocompañero.Trabajando || estadoActual == Estadocompañero.Enojado)
+        if (estadoActual == Estadocompañero.Trabajando)
             texto = $"{estadoActual} ({Mathf.Max(0, progresoTarea):F1}s)";
+        else if (estadoActual == Estadocompañero.Dormido)
+            texto = $"Dormido ({Mathf.Max(0, temporizadorDormido):F1}s)";
         else
             texto = estadoActual.ToString();
 
@@ -135,6 +230,16 @@ public class Compañero : MonoBehaviour
         if (nuevaTarea == null)
         {
             Debug.LogWarning("Se intentó asignar una tarea nula.");
+            return;
+        }
+
+        // Cada tarea asignada baja el cansancio (correcta o incorrecta).
+        ReducirCansancio(cansancioPorTarea);
+
+        // Si no es de su categoría, NO la recibe y se enoja.
+        if (!EsRolCorrecto(nuevaTarea.rolRequerido))
+        {
+            RechazarTarea(nuevaTarea);
             return;
         }
 
@@ -173,7 +278,7 @@ public class Compañero : MonoBehaviour
             progresoTarea = tareaActual.duracionBase;
 
             bool esCorrecta = (tareaActual.rolRequerido == rolcompañero);
-            Estadocompañero nuevoEstado = esCorrecta ? Estadocompañero.Trabajando : Estadocompañero.Enojado;
+            Estadocompañero nuevoEstado = EstadoParaTarea(tareaActual);
 
             CambiarEstado(nuevoEstado);
             Debug.Log($"{nombre} comenzó '{tareaActual.nombreTarea}' (Rol requerido: {tareaActual.rolRequerido}, Rol propio: {rolcompañero}) - {(esCorrecta ? "¡Correcta!" : "Incorrecta")}");
@@ -263,6 +368,11 @@ public class Compañero : MonoBehaviour
         {
             animator.Play("boludeando", 0, 0f);
         }
+        else if (estadoActual == Estadocompañero.Dormido && animator.HasState(0, Animator.StringToHash("Esperando")))
+        {
+            // No hay animación de dormir; dejamos la pose de espera mientras duerme.
+            animator.Play("Esperando", 0, 0f);
+        }
         else
         {
             Debug.LogWarning($"{nombre}: El Animator no contiene el estado '{nombreEstado}'.");
@@ -307,6 +417,160 @@ public class Compañero : MonoBehaviour
     private void ResetearTemporizadorDistraccion()
     {
         temporizadorDistraccion = Random.Range(tiempoMinDistraccion, tiempoMaxDistraccion);
+    }
+
+    // MÉTODOS DE CANSANCIO / SUEÑO ---------------------------------
+
+    private Estadocompañero EstadoParaTarea(Tarea tarea)
+    {
+        return (tarea.rolRequerido == rolcompañero) ? Estadocompañero.Trabajando : Estadocompañero.Enojado;
+    }
+
+    /// <summary>
+    /// Reduce el cansancio al dar una tarea. Si llega a 0, el compañero se duerme.
+    /// Mientras duerme no se reduce (está recuperándose).
+    /// </summary>
+    private void ReducirCansancio(float cantidad)
+    {
+        if (estadoActual == Estadocompañero.Dormido) return;
+
+        cansancio = Mathf.Max(0f, cansancio - cantidad);
+        ActualizarBarra();
+
+        if (cansancio <= 0f)
+        {
+            Dormir();
+        }
+    }
+
+    /// <summary>
+    /// Rechaza una tarea de otra categoría: no la recibe y se enoja un instante.
+    /// El cansancio ya se descontó en AsignarTarea (se cansa igual).
+    /// </summary>
+    private void RechazarTarea(Tarea tarea)
+    {
+        ReproducirSonido(sonidoEnojado);
+        Debug.Log($"{nombre} rechazó la tarea '{tarea.nombreTarea}' (no es de su categoría) y se enojó.");
+
+        // Dormido no reacciona.
+        if (estadoActual == Estadocompañero.Dormido) return;
+
+        if (rutinaEnojado != null) StopCoroutine(rutinaEnojado);
+        rutinaEnojado = StartCoroutine(ReaccionEnojado());
+    }
+
+    private IEnumerator ReaccionEnojado()
+    {
+        CambiarEstado(Estadocompañero.Enojado);
+
+        yield return new WaitForSeconds(duracionEnojado);
+
+        rutinaEnojado = null;
+
+        // Retoma la tarea que estaba haciendo o vuelve a esperar.
+        if (tareaActual != null)
+            CambiarEstado(Estadocompañero.Trabajando);
+        else
+            CambiarEstado(Estadocompañero.Esperando);
+    }
+
+    private void Dormir()
+    {
+        if (estadoActual == Estadocompañero.Dormido) return;
+
+        // Cancela cualquier distracción activa.
+        if (rutinaDistraccion != null)
+        {
+            StopCoroutine(rutinaDistraccion);
+            rutinaDistraccion = null;
+        }
+        pausadoPorDistraccion = false;
+
+        temporizadorDormido = duracionDormido;
+        cansancio = 0f;
+
+        CambiarEstado(Estadocompañero.Dormido);
+        ActualizarBarra();
+        Debug.Log($"{nombre} está completamente cansado y se quedó dormido ({duracionDormido}s).");
+    }
+
+    /// <summary>
+    /// Mientras duerme, la barra va creciendo desde 0 hasta la mitad
+    /// (cansancioAlDespertar) a lo largo de duracionDormido segundos.
+    /// </summary>
+    private void ProcesarDormido()
+    {
+        temporizadorDormido -= Time.deltaTime;
+
+        float t = Mathf.Clamp01(1f - temporizadorDormido / duracionDormido);
+        cansancio = Mathf.Lerp(0f, cansancioAlDespertar, t);
+        ActualizarBarra();
+
+        if (temporizadorDormido <= 0f)
+        {
+            Despertar();
+        }
+    }
+
+    private void Despertar()
+    {
+        cansancio = cansancioAlDespertar;
+        ActualizarBarra();
+
+        Debug.Log($"{nombre} despertó con la barra al {cansancio:F0}%.");
+
+        // Si estaba a mitad de una tarea, la retoma; si no, arranca la siguiente.
+        if (tareaActual != null)
+        {
+            CambiarEstado(EstadoParaTarea(tareaActual));
+            ResetearTemporizadorDistraccion();
+        }
+        else
+        {
+            IniciarSiguienteTarea();
+        }
+    }
+
+    private void ActualizarBarra()
+    {
+        if (barraCansancio != null)
+        {
+            barraCansancio.SetProgreso(cansancio / Mathf.Max(0.0001f, cansancioMaximo));
+        }
+    }
+
+    /// <summary>
+    /// Busca el canvas "barraCansancio" (hijo del workerDisplay o, como respaldo,
+    /// en cualquier descendiente) y le agrega/obtiene el componente BarraCansancio.
+    /// </summary>
+    private BarraCansancio ObtenerBarraCansancio()
+    {
+        Transform nodo = null;
+
+        if (workerDisplay != null)
+            nodo = workerDisplay.transform.Find("barraCansancio");
+
+        if (nodo == null)
+        {
+            Transform[] todos = GetComponentsInChildren<Transform>(true);
+            foreach (Transform hijo in todos)
+            {
+                if (hijo.name == "barraCansancio")
+                {
+                    nodo = hijo;
+                    break;
+                }
+            }
+        }
+
+        if (nodo == null)
+            return null;
+
+        BarraCansancio barra = nodo.GetComponent<BarraCansancio>();
+        if (barra == null)
+            barra = nodo.gameObject.AddComponent<BarraCansancio>();
+
+        return barra;
     }
 
     public bool EsRolCorrecto(RolTarea rol)
