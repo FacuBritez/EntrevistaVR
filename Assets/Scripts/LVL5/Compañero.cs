@@ -63,9 +63,9 @@ public class Compañero : MonoBehaviour
     [Tooltip("Valor inicial de la barra al empezar.")]
     [SerializeField] private float cansancioInicial = 100f;
     [Tooltip("Cuánto baja el cansancio cada vez que se le asigna una tarea.")]
-    [SerializeField] private float cansancioPorTarea = 20f;
+    [SerializeField] private float cansancioPorTarea = 15f;
     [Tooltip("Segundos que tarda en despertarse una vez dormido.")]
-    [SerializeField] private float duracionDormido = 40f;
+    [SerializeField] private float duracionDormido = 15f;
     [Tooltip("Nivel de cansancio (0..cansancioMaximo) con el que despierta (medio lleno).")]
     [SerializeField] private float cansancioAlDespertar = 50f;
 
@@ -111,10 +111,14 @@ public class Compañero : MonoBehaviour
     // Enojo
     private Coroutine rutinaEnojado;
 
+    // Desaturación al dormir
+    private Dictionary<Material, Color> coloresBaseCuerpo;
+
     // Propiedades públicas
     public Estadocompañero EstadoActual => estadoActual;
     public Tarea TareaActual => tareaActual;
     public int TareasPendientes => listaTareas.Count;
+    public bool EstaDormido => estadoActual == Estadocompañero.Dormido;
 
     /// <summary>
     /// Punto del cuerpo al que apuntar (el centro, no los pies), desplazado un
@@ -153,6 +157,9 @@ public class Compañero : MonoBehaviour
 
         cansancio = Mathf.Clamp(cansancioInicial, 0f, cansancioMaximo);
         escalaOriginal = transform.localScale;
+
+        // Cachear los materiales del cuerpo para la desaturación al dormir.
+        CapturarMaterialesCuerpo();
 
         if (barraCansancio == null)
             barraCansancio = ObtenerBarraCansancio();
@@ -230,6 +237,13 @@ public class Compañero : MonoBehaviour
         if (nuevaTarea == null)
         {
             Debug.LogWarning("Se intentó asignar una tarea nula.");
+            return;
+        }
+
+        // Dormido: no puede recibir tareas.
+        if (estadoActual == Estadocompañero.Dormido)
+        {
+            Debug.Log($"{nombre} está dormido y no puede recibir tareas.");
             return;
         }
 
@@ -490,7 +504,15 @@ public class Compañero : MonoBehaviour
         cansancio = 0f;
 
         CambiarEstado(Estadocompañero.Dormido);
+        AplicarDesaturacion(true);
         ActualizarBarra();
+
+        // Penalización de dinero por quedarse dormido.
+        if (OleadasManager.Instancia != null)
+        {
+            OleadasManager.Instancia.RegistrarCompaneroDormido(PuntoApuntado);
+        }
+
         Debug.Log($"{nombre} está completamente cansado y se quedó dormido ({duracionDormido}s).");
     }
 
@@ -515,6 +537,7 @@ public class Compañero : MonoBehaviour
     private void Despertar()
     {
         cansancio = cansancioAlDespertar;
+        AplicarDesaturacion(false);
         ActualizarBarra();
 
         Debug.Log($"{nombre} despertó con la barra al {cansancio:F0}%.");
@@ -536,6 +559,65 @@ public class Compañero : MonoBehaviour
         if (barraCansancio != null)
         {
             barraCansancio.SetProgreso(cansancio / Mathf.Max(0.0001f, cansancioMaximo));
+        }
+    }
+
+    /// <summary>
+    /// Cachea los materiales del cuerpo (mesh renderers) y sus colores base para
+    /// poder desaturarlos al dormir y restaurarlos al despertar.
+    /// </summary>
+    private void CapturarMaterialesCuerpo()
+    {
+        coloresBaseCuerpo = new Dictionary<Material, Color>();
+
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer r in renderers)
+        {
+            // .materials devuelve instancias propias de cada renderer.
+            Material[] mats = r.materials;
+            foreach (Material m in mats)
+            {
+                if (m == null || coloresBaseCuerpo.ContainsKey(m))
+                    continue;
+
+                Color baseColor = m.HasProperty("_BaseColor")
+                    ? m.GetColor("_BaseColor")
+                    : m.color;
+
+                coloresBaseCuerpo[m] = baseColor;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Desatura (pone en gris) o restaura el color de los materiales del cuerpo.
+    /// Se usa al dormir (gris) y al despertar (color original).
+    /// </summary>
+    private void AplicarDesaturacion(bool desaturar)
+    {
+        if (coloresBaseCuerpo == null)
+            return;
+
+        foreach (var kv in coloresBaseCuerpo)
+        {
+            Material m = kv.Key;
+            if (m == null)
+                continue;
+
+            Color objetivo;
+            if (desaturar)
+            {
+                float g = kv.Value.grayscale;
+                objetivo = new Color(g, g, g, kv.Value.a);
+            }
+            else
+            {
+                objetivo = kv.Value;
+            }
+
+            if (m.HasProperty("_BaseColor"))
+                m.SetColor("_BaseColor", objetivo);
+            m.SetColor("_Color", objetivo);
         }
     }
 

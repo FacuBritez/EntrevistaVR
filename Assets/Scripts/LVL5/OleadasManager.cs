@@ -9,7 +9,7 @@ public class OleadasManager : MonoBehaviour
     public class ConfiguracionEntrega
     {
         public int cantidadTareas = 5;
-        public float tiempoEntrega = 126f;
+        public float tiempoEntrega = 30f;
     }
 
     [Header("Configuración de Entregas")]
@@ -34,6 +34,21 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private AudioClip sonidoEntregaCompletada;
     [SerializeField] private AudioClip sonidoEntregaFallida;
     [SerializeField] private AudioClip sonidoJuegoGanado;
+
+    [Header("Alerta de tiempo")]
+    [Tooltip("Luz 'LuzAlerta' que se enciende cuando queda poco tiempo.")]
+    [SerializeField] private Light luzAlerta;
+    [Tooltip("Sonido de alarma (se puede cambiar desde el Inspector). Suena en bucle.")]
+    [SerializeField] private AudioClip sonidoAlarma;
+    [Tooltip("Segundos restantes para activar la alerta (luz + alarma).")]
+    [SerializeField] private float umbralAlerta = 20f;
+
+    [Header("Dinero / Puntaje")]
+    [SerializeField] private int dineroCorrecta = 5000;
+    [SerializeField] private int dineroIncorrecta = -3500;
+    [SerializeField] private int dineroDormido = -8000;
+    [Tooltip("TMP_Text de un Canvas (world-space) en el escenario donde se muestra el dinero.")]
+    [SerializeField] private TMP_Text textoDinero;
 
     [Header("Tutorial")]
     [SerializeField] private GameObject prefabTareaTutorial;   // El prefab de la tarea (mismo que usa GeneradorTareas)
@@ -63,6 +78,10 @@ public class OleadasManager : MonoBehaviour
     private bool esperandoProximaEntrega = false;
     private bool bloqueoColorTiempo = false; // evita que Update pise el color durante el efecto de error
     private Coroutine rutinaErrorTiempo;
+    private bool alertaActiva = false; // la alarma de tiempo está sonando
+
+    // Dinero / puntaje
+    private int dinero = 0;
 
     // Tutorial
     private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, Completado }
@@ -95,6 +114,14 @@ public class OleadasManager : MonoBehaviour
 
     private void Start()
     {
+        // Asegurar un AudioSource para la alarma y los sonidos.
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = GetComponentInChildren<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
         IniciarTutorial();
     }
 
@@ -115,6 +142,12 @@ public class OleadasManager : MonoBehaviour
             tiempoRestante = 0f;
 
         ActualizarCirculoProgresoTiempo();
+
+        // Alerta: cuando queda poco tiempo, encender la luz y sonar la alarma.
+        if (tiempoRestante <= umbralAlerta && tiempoRestante > 0f)
+        {
+            ActivarAlerta();
+        }
 
         // Si ya se asignaron todas las tareas pero todavía
         // hay compañeros trabajando, mostramos el mensaje.
@@ -594,6 +627,9 @@ public class OleadasManager : MonoBehaviour
         entregaActiva = true;
         esperandoProximaEntrega = false;
 
+        // Apagar la alerta de la entrega anterior.
+        DesactivarAlerta();
+
         // Reiniciar círculo de progreso (lleno al 100% y color blanco)
         ActualizarCirculoProgresoTiempo();
 
@@ -660,6 +696,53 @@ public class OleadasManager : MonoBehaviour
         float t = 1f - Mathf.Pow(progreso, 0.5f); // raíz cuadrada para efecto de easing
 
         circuloProgreso.color = Color.Lerp(Color.white, Color.red, t);
+    }
+
+    /// <summary>
+    /// Enciende la luz de alerta y arranca la alarma en bucle (si hay clip).
+    /// </summary>
+    private void ActivarAlerta()
+    {
+        if (alertaActiva) return;
+        alertaActiva = true;
+
+        if (luzAlerta != null)
+            luzAlerta.gameObject.SetActive(true);
+
+        if (audioSource != null && sonidoAlarma != null)
+        {
+            audioSource.loop = true;
+            audioSource.clip = sonidoAlarma;
+            audioSource.Play();
+        }
+
+        Debug.Log("🚨 ¡Alerta! Queda poco tiempo.");
+    }
+
+    /// <summary>
+    /// Apaga la luz de alerta y detiene la alarma.
+    /// </summary>
+    private void DesactivarAlerta()
+    {
+        if (!alertaActiva)
+        {
+            // Asegurar que la luz quede apagada aunque la alarma no haya sonado.
+            if (luzAlerta != null && luzAlerta.gameObject.activeSelf)
+                luzAlerta.gameObject.SetActive(false);
+            return;
+        }
+
+        alertaActiva = false;
+
+        if (luzAlerta != null)
+            luzAlerta.gameObject.SetActive(false);
+
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+            audioSource.loop = false;
+            audioSource.clip = null;
+        }
     }
 
     /// <summary>
@@ -741,7 +824,7 @@ public class OleadasManager : MonoBehaviour
     // REGISTRO DE ESTADÍSTICAS
     // ---------------------------------------------------------
 
-    public void RegistrarAsignacion(bool correcta)
+    public void RegistrarAsignacion(bool correcta, Vector3? posicionPopup = null)
     {
         tareasAsignadas++;
 
@@ -756,6 +839,12 @@ public class OleadasManager : MonoBehaviour
             // Penalización por entrega incorrecta (solo durante una entrega activa).
             if (entregaActiva)
                 AplicarPenalizacionIncorrecta();
+        }
+
+        // Dinero (solo durante una entrega activa).
+        if (entregaActiva)
+        {
+            AgregarDinero(correcta ? dineroCorrecta : dineroIncorrecta, posicionPopup);
         }
 
         Debug.Log(
@@ -800,6 +889,8 @@ public class OleadasManager : MonoBehaviour
 
         entregaActiva = false;
         esperandoProximaEntrega = true;
+
+        DesactivarAlerta();
 
         if (audioSource != null && sonidoEntregaCompletada != null)
             audioSource.PlayOneShot(sonidoEntregaCompletada);
@@ -852,6 +943,8 @@ public class OleadasManager : MonoBehaviour
             return;
 
         entregaActiva = false;
+
+        DesactivarAlerta();
 
         if (audioSource != null && sonidoEntregaFallida != null)
             audioSource.PlayOneShot(sonidoEntregaFallida);
@@ -919,6 +1012,143 @@ public class OleadasManager : MonoBehaviour
             c.overrideSorting = true;
             c.sortingOrder = 200;
         }
+    }
+
+    // ---------------------------------------------------------
+    // DINERO / PUNTAJE
+    // ---------------------------------------------------------
+
+    public int DineroActual => dinero;
+
+    /// <summary>
+    /// Suma (o resta) dinero, actualiza el contador y, si se pasa una posición,
+    /// muestra un popup flotante con el valor (gamefeeling de casino).
+    /// </summary>
+    public void AgregarDinero(int cantidad, Vector3? posicionPopup = null)
+    {
+        dinero += cantidad;
+        ActualizarTextoDinero();
+
+        if (posicionPopup.HasValue)
+            CrearPopupDinero(cantidad, posicionPopup.Value);
+
+        // Si te quedás sin dinero (negativo), perdés.
+        if (dinero < 0 && entregaActiva)
+            PerderPorDinero();
+    }
+
+    /// <summary>
+    /// Pierde la partida por quedarse sin dinero.
+    /// </summary>
+    private void PerderPorDinero()
+    {
+        if (!entregaActiva)
+            return;
+
+        entregaActiva = false;
+        DesactivarAlerta();
+
+        if (audioSource != null && sonidoEntregaFallida != null)
+            audioSource.PlayOneShot(sonidoEntregaFallida);
+
+        Debug.Log("❌ Te quedaste sin dinero. ¡JUEGO PERDIDO!");
+
+        PerderJuego();
+    }
+
+    /// <summary>
+    /// Notifica que un compañero se durmió (penalización de dinero).
+    /// </summary>
+    public void RegistrarCompaneroDormido(Vector3 posicion)
+    {
+        if (!entregaActiva)
+            return;
+
+        AgregarDinero(dineroDormido, posicion);
+    }
+
+    private void ActualizarTextoDinero()
+    {
+        if (textoDinero != null)
+            textoDinero.text = $"$ {dinero:N0}";
+    }
+
+    /// <summary>
+    /// Muestra un popup flotante con el valor sumado/restado (gamefeeling de casino).
+    /// </summary>
+    private void CrearPopupDinero(int cantidad, Vector3 posicion)
+    {
+        bool positivo = cantidad >= 0;
+
+        var go = new GameObject("PopupDinero", typeof(RectTransform));
+        go.transform.position = posicion;
+        go.transform.localScale = Vector3.one * 0.004f;
+
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 300;
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(400f, 120f);
+
+        var goTexto = new GameObject("Texto", typeof(RectTransform));
+        goTexto.transform.SetParent(go.transform, false);
+
+        var texto = goTexto.AddComponent<TextMeshProUGUI>();
+        texto.font = TMP_Settings.defaultFontAsset;
+        texto.fontSize = 48;
+        texto.alignment = TextAlignmentOptions.Center;
+        texto.color = positivo ? new Color(0.3f, 1f, 0.5f, 1f) : new Color(1f, 0.2f, 0.2f, 1f);
+        texto.outlineWidth = 0.2f;
+        texto.outlineColor = Color.black;
+        texto.text = positivo ? $"+{cantidad:N0}" : $"{cantidad:N0}";
+
+        var rtTexto = goTexto.GetComponent<RectTransform>();
+        rtTexto.anchorMin = Vector2.zero;
+        rtTexto.anchorMax = Vector2.one;
+        rtTexto.offsetMin = Vector2.zero;
+        rtTexto.offsetMax = Vector2.zero;
+
+        StartCoroutine(AnimacionPopup(go, texto, posicion));
+    }
+
+    private IEnumerator AnimacionPopup(GameObject go, TextMeshProUGUI texto, Vector3 posicionInicial)
+    {
+        float duracion = 1.2f;
+        float t = 0f;
+        Color colorBase = texto.color;
+        float escalaBase = 0.01f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duracion;
+            float u = Mathf.Clamp01(t);
+
+            // Zoom in: de 30% a 120% de la escala base.
+            float escala = escalaBase * Mathf.Lerp(0.3f, 1.2f, u);
+            go.transform.localScale = Vector3.one * escala;
+
+            // Sube.
+            go.transform.position = posicionInicial + Vector3.up * (u * 1.5f);
+
+            // Pierde opacidad al final.
+            float alpha = (u > 0.55f) ? Mathf.Lerp(1f, 0f, (u - 0.55f) / 0.45f) : 1f;
+            texto.color = new Color(colorBase.r, colorBase.g, colorBase.b, alpha);
+
+            // Billboard hacia la cámara.
+            if (Camera.main != null)
+            {
+                Vector3 dir = go.transform.position - Camera.main.transform.position;
+                dir.y = 0f;
+                if (dir.sqrMagnitude > 0.0001f)
+                    go.transform.rotation = Quaternion.LookRotation(dir);
+            }
+
+            yield return null;
+        }
+
+        Destroy(go);
     }
 
     // ---------------------------------------------------------

@@ -124,7 +124,8 @@ public class JugadorAsignadorTareas : MonoBehaviour
         {
             Compañero nuevo = hit.collider.GetComponentInParent<Compañero>();
 
-            if (nuevo != null)
+            // A un compañero dormido no se lo puede apuntar: no pasa nada.
+            if (nuevo != null && !nuevo.EstaDormido)
             {
                 if (nuevo != compañeroApuntado)
                 {
@@ -245,7 +246,7 @@ public class JugadorAsignadorTareas : MonoBehaviour
 
         if (OleadasManager.Instancia != null)
         {
-            OleadasManager.Instancia.RegistrarAsignacion(correcta);
+            OleadasManager.Instancia.RegistrarAsignacion(correcta, compañeroApuntado.PuntoApuntado);
         }
 
         if (hoja.EsTutorial && OleadasManager.Instancia != null)
