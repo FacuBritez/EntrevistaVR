@@ -1478,11 +1478,13 @@ MonoBehaviour:
   duracionMensajeProximaEntrega: 2
   generadorTareas: {fileID: 1020580579}
   audioSource: {fileID: 0}
-  sonidoEntregaCompletada: {fileID: 0}
-  sonidoEntregaFallida: {fileID: 0}
-  sonidoJuegoGanado: {fileID: 0}
+  sonidoEntregaCompletada: {fileID: 8300000, guid: 3eb85138aa548bd4db68d9a8c09f4c86,
+    type: 3}
+  sonidoEntregaFallida: {fileID: 8300000, guid: 4804f5028575bbd40a2144a120d4be12,
+    type: 3}
+  sonidoJuegoGanado: {fileID: 8300000, guid: 4bbeec43a834fd34ba2fb118f7d93aa6, type: 3}
   luzAlerta: {fileID: 1907497495}
-  sonidoAlarma: {fileID: 0}
+  sonidoAlarma: {fileID: 8300000, guid: e60d6856d45031149bea72c1b5810ea3, type: 3}
   umbralAlerta: 20
   dineroCorrecta: 5000
   dineroIncorrecta: -3500

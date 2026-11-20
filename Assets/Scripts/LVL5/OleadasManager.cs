@@ -8,7 +8,7 @@ public class OleadasManager : MonoBehaviour
     [System.Serializable]
     public class ConfiguracionEntrega
     {
-        public int cantidadTareas = 5;
+        public int cantidadTareas = 10;
         public float tiempoEntrega = 30f;
     }
 
@@ -23,7 +23,7 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private Image circuloProgreso;
 
     [Header("Tiempos de mensajes")]
-    [SerializeField] private float duracionMensajeEntregaCompletada = 3f;
+    [SerializeField] private float duracionMensajeEntregaCompletada = 2f;
     [SerializeField] private float duracionMensajeProximaEntrega = 2f;
 
     [Header("Generador")]
