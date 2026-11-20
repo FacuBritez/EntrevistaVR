@@ -124,10 +124,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textoTarea: {fileID: 3585357999089375034}
+  iconosRol:
+  - {fileID: 21300000, guid: 7fb63c5257978b746880b4123d207d75, type: 3}
+  - {fileID: 21300000, guid: ff58e8efd8d3b3b4d831a7ff8698399b, type: 3}
+  - {fileID: 21300000, guid: 6a1bac6d38f64b149b9b6f400596ba3c, type: 3}
+  - {fileID: 21300000, guid: 69fd60d630a190241b57c2e61f63f448, type: 3}
+  - {fileID: 21300000, guid: f740c5603b383614f8b1b90ad287cabb, type: 3}
   nombreTarea: "Tarea f\xEDsica"
   rolRequerido: 0
   duracionBase: 5
-  alturaMaxima: 0.9
   audioSource: {fileID: 7510932052966686630}
   sonidoSalida: {fileID: 8300000, guid: 740ac4d8462105f489b781ca7b66c6be, type: 3}
 --- !u!54 &4111423100960511504

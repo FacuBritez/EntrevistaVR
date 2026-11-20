@@ -15,6 +15,14 @@ public class GeneradorTareas : MonoBehaviour
     [SerializeField] private Transform puntoSpawn;
     [SerializeField] private TMP_Text textoTareasRestantes;
 
+    [Header("Plano de acumulación")]
+    [Tooltip("Plano 'AcaAparecenTareas' donde se van apilando las tareas que nadie agarró.")]
+    [SerializeField] private Transform planoAparicion;
+
+    [Header("Temporización")]
+    [Tooltip("Segundos entre cada tarea que sale automáticamente del fax.")]
+    [SerializeField] private float intervaloSpawn = 1f;
+
     [Header("Configuración de tareas")]
     [SerializeField]
     private TareaDisponible[] tareasDisponibles =
@@ -92,17 +100,23 @@ public class GeneradorTareas : MonoBehaviour
     [SerializeField] private float duracionMin = 4f;
     [SerializeField] private float duracionMax = 10f;
 
-    private GameObject hojaActual;
-
     private int tareasRestantesPorGenerar;
     private bool oleadaActiva;
+
+    private float temporizadorSpawn;
+    private int contadorPlano; // cuántas tareas hay apiladas en el plano (para escalonarlas)
 
     public void IniciarOleada(int cantidadTareas)
     {
         tareasRestantesPorGenerar = cantidadTareas;
         oleadaActiva = true;
 
-        hojaActual = null;
+        temporizadorSpawn = 0f; // la primera sale en seguida
+        contadorPlano = 0;
+
+        // Mostrar el plano donde se apilan las tareas (está oculto en la escena).
+        if (planoAparicion != null)
+            planoAparicion.gameObject.SetActive(true);
 
         ActualizarTextoRestantes();
     }
@@ -115,10 +129,14 @@ public class GeneradorTareas : MonoBehaviour
         if (tareasRestantesPorGenerar <= 0)
             return;
 
-        if (hojaActual != null)
-            return;
-
-        GenerarTarea();
+        // Las tareas salen solas cada "intervaloSpawn" segundos,
+        // SIN esperar a que el jugador agarre la anterior.
+        temporizadorSpawn -= Time.deltaTime;
+        if (temporizadorSpawn <= 0f)
+        {
+            temporizadorSpawn = intervaloSpawn;
+            GenerarTarea();
+        }
     }
 
     private void GenerarTarea()
@@ -129,19 +147,18 @@ public class GeneradorTareas : MonoBehaviour
         if (tareasDisponibles == null || tareasDisponibles.Length == 0)
             return;
 
-        hojaActual = Instantiate(
+        GameObject hojaGO = Instantiate(
             prefabHojaTarea,
             puntoSpawn.position,
             puntoSpawn.rotation
         );
 
-        HojaTarea hoja = hojaActual.GetComponent<HojaTarea>();
+        HojaTarea hoja = hojaGO.GetComponent<HojaTarea>();
 
         if (hoja == null)
         {
             Debug.LogWarning("El prefab no tiene componente HojaTarea.");
-            Destroy(hojaActual);
-            hojaActual = null;
+            Destroy(hojaGO);
             return;
         }
 
@@ -161,6 +178,9 @@ public class GeneradorTareas : MonoBehaviour
 
         hoja.ActualizarTexto();
 
+        // Animación "squash" desde el fax hasta el plano, donde se acumulan.
+        hoja.IniciarAnimacionAparicion(CalcularDestinoAcumulacion());
+
         tareasRestantesPorGenerar--;
 
         ActualizarTextoRestantes();
@@ -172,6 +192,24 @@ public class GeneradorTareas : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Calcula la posición de aterrizaje de una nueva tarea sobre el plano,
+    /// apilándola (un poquito más arriba) y con una pequeña dispersión lateral.
+    /// </summary>
+    private Vector3 CalcularDestinoAcumulacion()
+    {
+        if (planoAparicion == null)
+            return puntoSpawn.position;
+
+        Vector3 destino = planoAparicion.position;
+        destino.x += Random.Range(-0.12f, 0.12f);
+        destino.z += Random.Range(-0.12f, 0.12f);
+        destino.y += contadorPlano * 0.002f; // escalón de pila (hojas finas)
+
+        contadorPlano++;
+        return destino;
+    }
+
     private void ActualizarTextoRestantes()
     {
         if (textoTareasRestantes != null)
@@ -179,5 +217,15 @@ public class GeneradorTareas : MonoBehaviour
             textoTareasRestantes.text =
                 $"Tareas Restantes: {tareasRestantesPorGenerar}";
         }
+    }
+
+    /// <summary>
+    /// Llamado cuando una tarea se cae o se descarta sin asignar, permitiendo que la máquina vuelva a imprimirla sin perder el cupo.
+    /// </summary>
+    public void ReintentarTarea()
+    {
+        tareasRestantesPorGenerar++;
+        ActualizarTextoRestantes();
+        Debug.Log("🔄 Tarea reintegrada a la cola de la entrega.");
     }
 }
