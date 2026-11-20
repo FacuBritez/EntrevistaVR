@@ -44,11 +44,17 @@ public class OleadasManager : MonoBehaviour
     [SerializeField] private float umbralAlerta = 20f;
 
     [Header("Dinero / Puntaje")]
+    [Tooltip("Dinero con el que empieza la partida.")]
+    [SerializeField] private int dineroInicial = 10000;
     [SerializeField] private int dineroCorrecta = 5000;
     [SerializeField] private int dineroIncorrecta = -3500;
     [SerializeField] private int dineroDormido = -8000;
     [Tooltip("TMP_Text de un Canvas (world-space) en el escenario donde se muestra el dinero.")]
     [SerializeField] private TMP_Text textoDinero;
+
+    [Header("Recreo")]
+    [Tooltip("Animación de recreo global, usada por todos los compañeros.")]
+    [SerializeField] private AnimationClip animacionRecreoGlobal;
 
     [Header("Tutorial")]
     [SerializeField] private GameObject prefabTareaTutorial;   // El prefab de la tarea (mismo que usa GeneradorTareas)
@@ -82,9 +88,8 @@ public class OleadasManager : MonoBehaviour
 
     // Dinero / puntaje
     private int dinero = 0;
-
     // Tutorial
-    private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, Completado }
+    private enum TutorialState { EsperandoAgarrar, EsperandoAsignar, EsperandoRecreo, Completado }
     private TutorialState tutorialState = TutorialState.EsperandoAgarrar;
     private bool tutorialActivo = true;
     private GameObject tareaTutorialInstancia;  // la instancia actual
@@ -122,6 +127,13 @@ public class OleadasManager : MonoBehaviour
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
 
+        // Dinero inicial.
+        dinero = dineroInicial;
+        ActualizarTextoDinero();
+
+        // Compartir la animación de recreo global con todos los compañeros.
+        Compañero.AnimacionRecreoGlobal = animacionRecreoGlobal;
+
         IniciarTutorial();
     }
 
@@ -129,7 +141,19 @@ public class OleadasManager : MonoBehaviour
     {
         if (tutorialActivo)
         {
-            // No hacemos nada aquí, el flujo se maneja con eventos
+            // Durante el tutorial, esperar a que el jugador mande al programador a recreo.
+            if (tutorialState == TutorialState.EsperandoRecreo)
+            {
+                Compañero comp = (programador != null) ? programador.GetComponent<Compañero>() : null;
+                if (comp != null && comp.EstaEnRecreo)
+                {
+                    tutorialState = TutorialState.Completado;
+                    tutorialActivo = false;
+                    DejarDeResaltar();
+                    OcultarFlecha();
+                    StartCoroutine(SecuenciaTutorial());
+                }
+            }
             return;
         }
 
@@ -258,11 +282,11 @@ public class OleadasManager : MonoBehaviour
     {
         if (tutorialActivo && tutorialState == TutorialState.EsperandoAsignar && acerto)
         {
-            tutorialState = TutorialState.Completado;
-            tutorialActivo = false;
+            tutorialState = TutorialState.EsperandoRecreo;
             DejarDeResaltar();
             OcultarFlecha();
-            StartCoroutine(SecuenciaTutorial());
+            ResaltarObjeto(programador);
+            MostrarDialogo("Con la pistola podés enviarlo a recrearse para que recuperen su barra de energía. Si se les acaba, se duermen por mucho tiempo");
         }
     }
 
@@ -902,6 +926,9 @@ public class OleadasManager : MonoBehaviour
             circuloProgreso.color = Color.white; // opcional, pero visualmente se ve bien
         }
 
+        // Confeti al terminar la oleada.
+        LanzarConfeti();
+
         Debug.Log(
             $"ENTREGA {numeroEntrega} COMPLETADA | " +
             $"Correctas: {tareasCorrectas} | " +
@@ -980,6 +1007,20 @@ public class OleadasManager : MonoBehaviour
             cartelGanaste.SetActive(true);
         }
 
+        // Todos los compañeros celebran (animación de recreo).
+        if (todosLosCompanieros != null)
+        {
+            foreach (var go in todosLosCompanieros)
+            {
+                if (go == null) continue;
+                var comp = go.GetComponent<Compañero>();
+                if (comp != null)
+                    comp.Celebrar();
+            }
+        }
+
+        LanzarConfeti();
+
         Debug.Log("¡JUEGO COMPLETADO!");
     }
 
@@ -991,7 +1032,51 @@ public class OleadasManager : MonoBehaviour
             cartelPerdiste.SetActive(true);
         }
 
+        // Desaparecer a los compañeros (no se puede interactuar con ellos).
+        DesactivarCompanieros();
+
         Debug.Log("¡JUEGO PERDIDO!");
+    }
+
+    private void DesactivarCompanieros()
+    {
+        if (todosLosCompanieros == null)
+            return;
+
+        foreach (var c in todosLosCompanieros)
+        {
+            if (c != null)
+                c.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Llueven confetis de colores sobre el jugador (cámara).
+    /// </summary>
+    private void LanzarConfeti()
+    {
+        Vector3 centro = Camera.main != null ? Camera.main.transform.position : transform.position;
+
+        for (int i = 0; i < 60; i++)
+        {
+            GameObject pieza = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            pieza.transform.position = centro + Vector3.up * 3f +
+                new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
+            pieza.transform.localScale = new Vector3(
+                Random.Range(0.03f, 0.08f),
+                Random.Range(0.03f, 0.08f),
+                Random.Range(0.03f, 0.08f));
+
+            var rend = pieza.GetComponent<Renderer>();
+            rend.material.color = Color.HSVToRGB(Random.value, 1f, 1f);
+
+            var rb = pieza.AddComponent<Rigidbody>();
+            rb.useGravity = true;
+            rb.drag = 1f;
+            rb.angularVelocity = Random.insideUnitSphere * 5f;
+
+            Destroy(pieza, 4f);
+        }
     }
 
     /// <summary>

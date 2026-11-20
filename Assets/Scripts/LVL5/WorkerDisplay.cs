@@ -185,6 +185,7 @@ public class WorkerDisplay : MonoBehaviour
             case Estadocompañero.Enojado:    return iconoEnojado;
             case Estadocompañero.Distraido:  return iconoDistraido;
             case Estadocompañero.Dormido:    return iconoDormido;
+            case Estadocompañero.Recreo:     return iconoEsperando; // reutiliza el icono de esperar
             default:                         return null;
         }
     }
@@ -198,6 +199,7 @@ public class WorkerDisplay : MonoBehaviour
             case Estadocompañero.Enojado:    return colorEnojado;
             case Estadocompañero.Distraido:  return colorDistraido;
             case Estadocompañero.Dormido:    return colorDormido;
+            case Estadocompañero.Recreo:     return colorEsperando;
             default:                         return Color.white;
         }
     }

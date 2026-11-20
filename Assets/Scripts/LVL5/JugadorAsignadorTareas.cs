@@ -94,7 +94,13 @@ public class JugadorAsignadorTareas : MonoBehaviour
             if (tareaEnMano != null && compañeroApuntado == null)
             {
                 ReproducirSonido(sonidoSoltarSinApuntar);
-                Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero. La hoja queda flotando para volver a agarrarla.");
+
+                // La hoja vuelve a su posición base (donde quedó después de spawnear).
+                HojaTarea hoja = tareaEnMano.GetComponent<HojaTarea>();
+                if (hoja != null)
+                    hoja.VolverAPosicion();
+
+                Debug.Log("❌ Soltó la tarea sin apuntar a ningún compañero. La hoja vuelve a su lugar.");
             }
             else if (tareaEnMano == null)
             {
@@ -124,8 +130,8 @@ public class JugadorAsignadorTareas : MonoBehaviour
         {
             Compañero nuevo = hit.collider.GetComponentInParent<Compañero>();
 
-            // A un compañero dormido no se lo puede apuntar: no pasa nada.
-            if (nuevo != null && !nuevo.EstaDormido)
+            // A un compañero dormido o en recreo no se lo puede apuntar.
+            if (nuevo != null && !nuevo.EstaDormido && !nuevo.EstaEnRecreo)
             {
                 if (nuevo != compañeroApuntado)
                 {

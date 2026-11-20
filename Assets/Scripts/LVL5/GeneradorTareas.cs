@@ -21,7 +21,7 @@ public class GeneradorTareas : MonoBehaviour
 
     [Header("Temporización")]
     [Tooltip("Segundos entre cada tarea que sale automáticamente del fax.")]
-    [SerializeField] private float intervaloSpawn = 5f;
+    [SerializeField] private float intervaloSpawn = 1f;
 
     [Header("Configuración de tareas")]
     [SerializeField]

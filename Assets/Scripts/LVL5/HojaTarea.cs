@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using TMPro;
@@ -29,7 +30,13 @@ public class HojaTarea : MonoBehaviour
     private Vector3 escalaOriginal;
     private Coroutine rutinaAparicion;
     private Coroutine rutinaDesintegracion;
+    private Coroutine rutinaVolver;
+    private Vector3 posicionBase;
+    private Quaternion rotacionBase = Quaternion.Euler(90f, 0f, 0f);
     private SpriteRenderer iconoRenderer;
+
+    // Colliders de todas las hojas, para que no colisionen entre sí.
+    private static List<Collider> colisionadoresHojas = new List<Collider>();
 
     void Awake()
     {
@@ -39,6 +46,24 @@ public class HojaTarea : MonoBehaviour
         escalaOriginal = transform.localScale;
 
         CrearIconoRol();
+        IgnorarColisionesEntreHojas();
+    }
+
+    /// <summary>
+    /// Evita que las hojas colisionen entre sí (solo entre hojas); así al aparecer
+    /// apiladas y mover una, no se empujan entre ellas ni traspasan el escenario.
+    /// </summary>
+    private void IgnorarColisionesEntreHojas()
+    {
+        Collider miCollider = GetComponent<Collider>();
+        if (miCollider == null) return;
+
+        foreach (var otro in colisionadoresHojas)
+        {
+            if (otro != null)
+                Physics.IgnoreCollision(miCollider, otro, true);
+        }
+        colisionadoresHojas.Add(miCollider);
     }
 
     void Start()
@@ -137,8 +162,62 @@ public class HojaTarea : MonoBehaviour
     /// </summary>
     public void IniciarAnimacionAparicion(Vector3 destino)
     {
+        // Guardar la posición base a la que debe volver si se suelta sin asignar.
+        posicionBase = destino;
+
         if (rutinaAparicion != null) StopCoroutine(rutinaAparicion);
         rutinaAparicion = StartCoroutine(AnimacionAparicion(destino));
+    }
+
+    /// <summary>
+    /// Vuelve a la posición donde quedó después de spawnear (la base de acumulación).
+    /// Se llama al soltar la hoja sin asignarla.
+    /// </summary>
+    public void VolverAPosicion()
+    {
+        if (rutinaVolver != null) StopCoroutine(rutinaVolver);
+        rutinaVolver = StartCoroutine(AnimacionVolver());
+    }
+
+    private IEnumerator AnimacionVolver()
+    {
+        // Deshabilitar el agarre mientras vuelve.
+        if (grab != null) grab.enabled = false;
+
+        // Congelar la física para que no siga girando/volando por el "throw" del grab.
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        float duracion = 0.5f;
+        float t = 0f;
+        Vector3 posInicio = transform.position;
+        Quaternion rotInicio = transform.rotation;
+        Quaternion rotFinal = Quaternion.Euler(90f, 0f, 0f);
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duracion;
+            float u = Mathf.Clamp01(t);
+            transform.position = Vector3.Lerp(posInicio, posicionBase, u);
+            transform.rotation = Quaternion.Slerp(rotInicio, rotFinal, u);
+            yield return null;
+        }
+
+        transform.position = posicionBase;
+        transform.rotation = rotFinal;
+        transform.localScale = escalaOriginal;
+
+        // Devolver la física a la normalidad.
+        if (rb != null)
+            rb.isKinematic = false;
+
+        if (grab != null) grab.enabled = true;
+        rutinaVolver = null;
     }
 
     private IEnumerator AnimacionAparicion(Vector3 destino)

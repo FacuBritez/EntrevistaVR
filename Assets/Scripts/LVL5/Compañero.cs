@@ -9,7 +9,8 @@ public enum Estadocompañero
     Trabajando,
     Enojado,
     Distraido,
-    Dormido
+    Dormido,
+    Recreo
 }
 
 [System.Serializable]
@@ -39,7 +40,7 @@ public class Compañero : MonoBehaviour
     [SerializeField] private RolTarea rolcompañero; // Rol fijo de este compañero
 
     [Header("Velocidades")]
-    [SerializeField] private float velocidadNormal = 1.0f;
+    [SerializeField] private float velocidadNormal = 1.67f;
     [SerializeField] private float velocidadEnojado = 0.5f;
 
     [Header("Distracción")]
@@ -65,7 +66,7 @@ public class Compañero : MonoBehaviour
     [Tooltip("Cuánto baja el cansancio cada vez que se le asigna una tarea.")]
     [SerializeField] private float cansancioPorTarea = 15f;
     [Tooltip("Segundos que tarda en despertarse una vez dormido.")]
-    [SerializeField] private float duracionDormido = 15f;
+    [SerializeField] private float duracionDormido = 8f;
     [Tooltip("Nivel de cansancio (0..cansancioMaximo) con el que despierta (medio lleno).")]
     [SerializeField] private float cansancioAlDespertar = 50f;
 
@@ -86,6 +87,17 @@ public class Compañero : MonoBehaviour
     [Header("Apuntado del láser")]
     [Tooltip("Fracción de la altura del personaje que se suma por encima del centro al apuntar (0.4 = 40% más alto).")]
     [SerializeField] private float alturaExtraApuntado = 0.4f;
+
+    [Header("Recreo")]
+    [Tooltip("Segundos que dura el recreo mientras recupera la barra de cansancio.")]
+    [SerializeField] private float duracionRecreo = 8f;
+    [Tooltip("Animación que reproduce mientras está en recreo (arrastrala desde el Inspector).")]
+    [SerializeField] private AnimationClip animacionRecreo;
+    [Tooltip("Porcentaje de la altura del personaje que se eleva al ir a recreo.")]
+    [SerializeField] private float porcentajeAlturaRecreo = 20f;
+
+    /// <summary>Animación de recreo global, compartida por todos los compañeros.</summary>
+    public static AnimationClip AnimacionRecreoGlobal;
 
     // --- Variables internas ---
     private string nombre => gameObject.name;
@@ -114,11 +126,23 @@ public class Compañero : MonoBehaviour
     // Desaturación al dormir
     private Dictionary<Material, Color> coloresBaseCuerpo;
 
+    // Recreo
+    private float temporizadorRecreo;
+    private float cansancioInicioRecreo;
+    private Vector3 posicionRecreo;
+    private Vector3 posicionOriginal;
+    private static int cantidadEnRecreo = 0;
+    private bool enCelebracion = false;
+    private AnimatorOverrideController overrideRecreo;
+    private RuntimeAnimatorController controllerOriginal;
+
     // Propiedades públicas
     public Estadocompañero EstadoActual => estadoActual;
     public Tarea TareaActual => tareaActual;
     public int TareasPendientes => listaTareas.Count;
     public bool EstaDormido => estadoActual == Estadocompañero.Dormido;
+    public bool EstaEnRecreo => estadoActual == Estadocompañero.Recreo;
+    public static int CantidadEnRecreo => cantidadEnRecreo;
 
     /// <summary>
     /// Punto del cuerpo al que apuntar (el centro, no los pies), desplazado un
@@ -186,18 +210,17 @@ public class Compañero : MonoBehaviour
             return;
         }
 
+        // Mientras está en recreo, recupera el cansancio y no procesa tareas.
+        if (estadoActual == Estadocompañero.Recreo)
+        {
+            ProcesarRecreo();
+            ActualizarTextoEstado();
+            return;
+        }
+
         if (estadoActual == Estadocompañero.Trabajando)
         {
             ProcesarTarea();
-        }
-
-        if (estadoActual == Estadocompañero.Trabajando && !pausadoPorDistraccion)
-        {
-            temporizadorDistraccion -= Time.deltaTime;
-            if (temporizadorDistraccion <= 0f)
-            {
-                IniciarDistraccion();
-            }
         }
 
         ActualizarTextoEstado();
@@ -224,6 +247,8 @@ public class Compañero : MonoBehaviour
             texto = $"{estadoActual} ({Mathf.Max(0, progresoTarea):F1}s)";
         else if (estadoActual == Estadocompañero.Dormido)
             texto = $"Dormido ({Mathf.Max(0, temporizadorDormido):F1}s)";
+        else if (estadoActual == Estadocompañero.Recreo)
+            texto = $"Recreo ({Mathf.Max(0, temporizadorRecreo):F1}s)";
         else
             texto = estadoActual.ToString();
 
@@ -240,10 +265,10 @@ public class Compañero : MonoBehaviour
             return;
         }
 
-        // Dormido: no puede recibir tareas.
-        if (estadoActual == Estadocompañero.Dormido)
+        // Dormido o en recreo: no puede recibir tareas.
+        if (estadoActual == Estadocompañero.Dormido || estadoActual == Estadocompañero.Recreo)
         {
-            Debug.Log($"{nombre} está dormido y no puede recibir tareas.");
+            Debug.Log($"{nombre} no puede recibir tareas ahora ({estadoActual}).");
             return;
         }
 
@@ -386,6 +411,10 @@ public class Compañero : MonoBehaviour
         {
             // No hay animación de dormir; dejamos la pose de espera mientras duerme.
             animator.Play("Esperando", 0, 0f);
+        }
+        else if (estadoActual == Estadocompañero.Recreo)
+        {
+            ReproducirAnimacionRecreo();
         }
         else
         {
@@ -552,6 +581,188 @@ public class Compañero : MonoBehaviour
         {
             IniciarSiguienteTarea();
         }
+    }
+
+    // MÉTODOS DE RECREO ---------------------------------
+
+    /// <summary>
+    /// Envía al compañero a recreo: lo mueve al destino, cambia a estado Recreo
+    /// y va recuperando toda la barra de cansancio durante duracionRecreo segundos.
+    /// Devuelve false si no puede ir (ya está en recreo, dormido, o ya hay 1 en recreo).
+    /// </summary>
+    public bool EnviarARecreo(Vector3 destino)
+    {
+        if (estadoActual == Estadocompañero.Recreo || estadoActual == Estadocompañero.Dormido)
+            return false;
+
+        if (cantidadEnRecreo >= 1)
+            return false;
+
+        // Detener tarea/distracción.
+        if (rutinaDistraccion != null)
+        {
+            StopCoroutine(rutinaDistraccion);
+            rutinaDistraccion = null;
+        }
+        pausadoPorDistraccion = false;
+
+        if (rutinaEnojado != null)
+        {
+            StopCoroutine(rutinaEnojado);
+            rutinaEnojado = null;
+        }
+
+        posicionOriginal = transform.position;
+        posicionRecreo = destino;
+        temporizadorRecreo = duracionRecreo;
+        cansancioInicioRecreo = cansancio;
+
+        enCelebracion = false;
+        cantidadEnRecreo++;
+        CambiarEstado(Estadocompañero.Recreo);
+
+        // Moverlo al área de recreo.
+        transform.position = destino;
+
+        Debug.Log($"{nombre} se fue a recreo ({duracionRecreo}s).");
+        return true;
+    }
+
+    private void ProcesarRecreo()
+    {
+        // Mantenerlo en el punto de recreo.
+        transform.position = posicionRecreo;
+
+        temporizadorRecreo -= Time.deltaTime;
+        float t = Mathf.Clamp01(1f - temporizadorRecreo / duracionRecreo);
+        cansancio = Mathf.Lerp(cansancioInicioRecreo, cansancioMaximo, t);
+        ActualizarBarra();
+
+        // Mantener la animación de recreo en bucle hasta terminar el recreo.
+        if (animator != null)
+        {
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.normalizedTime >= 0.98f)
+            {
+                animator.Play(stateInfo.shortNameHash, 0, 0f);
+            }
+        }
+
+        if (temporizadorRecreo <= 0f)
+        {
+            FinalizarRecreo();
+        }
+    }
+
+    private void FinalizarRecreo()
+    {
+        cansancio = cansancioMaximo;
+        ActualizarBarra();
+
+        // Solo decrementa el contador si fue un recreo normal (no una celebración).
+        if (!enCelebracion)
+            cantidadEnRecreo--;
+        enCelebracion = false;
+
+        // Volver a su posición original (al escritorio).
+        transform.position = posicionOriginal;
+
+        // Restaurar el Animator Controller original.
+        RestaurarController();
+
+        Debug.Log($"{nombre} terminó su recreo con la barra llena y volvió a su lugar.");
+
+        if (tareaActual != null)
+        {
+            CambiarEstado(EstadoParaTarea(tareaActual));
+            ResetearTemporizadorDistraccion();
+        }
+        else
+        {
+            // Retoma la siguiente tarea en cola, o queda esperando.
+            IniciarSiguienteTarea();
+        }
+    }
+
+    /// <summary>
+    /// Reproduce la animación de recreo. Si se asignó un clip, lo fuerza mediante
+    /// un AnimatorOverrideController (reemplaza la pose de espera); si no, usa
+    /// la pose de espera del controller.
+    /// </summary>
+    private void ReproducirAnimacionRecreo()
+    {
+        if (animator == null) return;
+
+        // Usar la animación asignada en este compañero o, si no, la global.
+        AnimationClip clip = (animacionRecreo != null) ? animacionRecreo : AnimacionRecreoGlobal;
+
+        if (clip != null)
+        {
+            // Intento 1: reproducir por nombre de estado (si el clip está en el controller).
+            if (animator.HasState(0, Animator.StringToHash(clip.name)))
+            {
+                animator.Play(clip.name, 0, 0f);
+                return;
+            }
+
+            // Intento 2: forzar con AnimatorOverrideController reemplazando TODOS
+            // los clips, así sin importar el nombre del estado reproduce el archivo.
+            if (controllerOriginal == null)
+                controllerOriginal = animator.runtimeAnimatorController;
+
+            if (overrideRecreo == null)
+            {
+                overrideRecreo = new AnimatorOverrideController(controllerOriginal);
+                animator.runtimeAnimatorController = overrideRecreo;
+            }
+
+            var clips = overrideRecreo.clips;
+            for (int i = 0; i < clips.Length; i++)
+            {
+                clips[i].overrideClip = clip;
+            }
+            overrideRecreo.clips = clips;
+        }
+
+        if (animator.HasState(0, Animator.StringToHash("Esperando")))
+            animator.Play("Esperando", 0, 0f);
+    }
+
+    private void RestaurarController()
+    {
+        if (animator != null && controllerOriginal != null)
+            animator.runtimeAnimatorController = controllerOriginal;
+
+        overrideRecreo = null;
+    }
+
+    private float ObtenerAltura()
+    {
+        Collider col = GetComponent<Collider>();
+        if (col != null && col.bounds.size.y > 0.01f)
+            return col.bounds.size.y;
+        return 1.5f;
+    }
+
+    /// <summary>
+    /// Celebración (usada al ganar): todos los compañeros hacen la animación de
+    /// recreo, elevados, sin contar contra el límite de recreo.
+    /// </summary>
+    public void Celebrar()
+    {
+        if (estadoActual == Estadocompañero.Dormido || estadoActual == Estadocompañero.Recreo) return;
+
+        posicionOriginal = transform.position;
+        temporizadorRecreo = duracionRecreo;
+        cansancioInicioRecreo = cansancio;
+
+        float altura = ObtenerAltura();
+        // Se eleva un porcentaje de su altura por encima de su posición.
+        posicionRecreo = posicionOriginal + Vector3.up * (altura * porcentajeAlturaRecreo / 100f);
+
+        enCelebracion = true;
+        CambiarEstado(Estadocompañero.Recreo);
+        transform.position = posicionRecreo;
     }
 
     private void ActualizarBarra()
